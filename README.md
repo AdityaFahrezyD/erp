@@ -38,7 +38,7 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-### 5. Generate Application Key
+### 5. Migrate & Seed Database
 
 ```bash
 php artisan migrate --seed
@@ -50,7 +50,7 @@ php artisan migrate --seed
 php artisan serve
 ```
 
-## ⚒️ How to Run Create New Page
+## ⚒️ How to Create New Page
 
 ###  1. Setting up the database and models
 
@@ -87,3 +87,28 @@ php artisan make:filament-resource Test
 ###  5. Setting up the resource form
 
 For more information you can see [Filement Documentation](https://filamentphp.com/docs/3.x/panels/getting-started#setting-up-the-resource-form)
+
+```php
+class TestResource extends Resource
+{
+    // ...
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\TextInput::make('test'), // <--- add this line
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('test'), // <--- add this line
+            ]);
+    }
+
+    // ...
+}
+```
