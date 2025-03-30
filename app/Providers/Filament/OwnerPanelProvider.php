@@ -24,7 +24,7 @@ class OwnerPanelProvider extends PanelProvider
     {
         return $panel
             ->id('owner')
-            ->path('owner')            
+            ->path('owner')
             ->colors([
                 'primary' => Color::Amber,
             ])
