@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reset_password', function (Blueprint $table) {
-            $table->uuid('id_reset', 16)->primary();
-            $table->string('email', 255);
-            $table->char('token', 64);
-            $table->date('expired_at');
+        Schema::create('going_projects', function (Blueprint $table) {
+            $table->uuid('project_id')->primary();
+            $table->string('project_name');
+            $table->float('unpaid_amount');
+            $table->string('status', 255);
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('reset_password');
+        Schema::dropIfExists('going_projects');
     }
 };

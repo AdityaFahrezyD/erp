@@ -6,26 +6,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class GoingProject extends Model
+class Finance extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'going_projects';
+    protected $table = 'finance';
 
-    protected $primaryKey = 'project_id';
+    protected $primaryKey = 'finance_id';
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
-        'project_id',
-        'project_name',
-        'unpaid_amount',
-        'status',
+        'finance_id',
+        'date',
+        'description',
+        'type',
+        'amount',
+        'saldo',
+        'notes',
+        'status_pembayaran',
+        'approve_status',
     ];
 
     protected $casts = [
-        'project_id' => 'uuid',
-        'unpaid_amount' => 'float',
+        'finance_id' => 'uuid',
+        'date' => 'date',
     ];
 }

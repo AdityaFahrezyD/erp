@@ -19,6 +19,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             GoingProjectSeeder::class,
+            InvoiceSeeder::class,
+            FinanceSeeder::class,
         ]);
+
     }
 }

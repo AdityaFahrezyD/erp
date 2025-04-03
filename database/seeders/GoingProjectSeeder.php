@@ -16,12 +16,26 @@ class GoingProjectSeeder extends Seeder
     public function run(): void
     {
         $values = [
-            ['project_name' => 'Soundbar', 'unpaid_amount' => 52000000],
-            ['project_name' => 'Svarga', 'unpaid_amount' => 132000000],
+            [
+                'project_id' => Str::uuid()->toString(),
+                'project_name' => 'Soundbar',
+                'unpaid_amount' => 52000000,
+                'status' => 'In Progress',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'project_id' => Str::uuid()->toString(),
+                'project_name' => 'Svarga',
+                'unpaid_amount' => 132000000,
+                'status' => 'Completed',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ];
 
         foreach ($values as $value) {
-            GoingProject::create($value);
+            DB::table('going_projects')->insert($value);
         }
     }
 }

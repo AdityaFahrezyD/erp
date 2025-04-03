@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('keuangan', function (Blueprint $table) {
-            $table->string('keuangan_id', 64)->primary();
-            $table->char('created_by', 16);
+        Schema::create('finance', function (Blueprint $table) {
+            $table->uuid('finance_id', 64)->primary();
             $table->date('date');
             $table->string('description', 255);
             $table->integer('type');
@@ -22,8 +21,7 @@ return new class extends Migration
             $table->string('notes', 255);
             $table->boolean('status_pembayaran');
             $table->boolean('approve_status');
-
-            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
