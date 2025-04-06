@@ -2,40 +2,31 @@
 
 namespace Database\Seeders;
 
-use App\Models\GoingProject;
-use Illuminate\Support\Str;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Str;
 
 class GoingProjectSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $values = [
+        DB::table('going_projects')->insert([
             [
-                'project_id' => Str::uuid()->toString(),
-                'project_name' => 'Soundbar',
-                'unpaid_amount' => 52000000,
-                'status' => 'In Progress',
+                'project_id' => Str::uuid(),
+                'project_name' => 'Pembuatan Sistem Inventory',
+                'unpaid_amount' => 10000000,
+                'status' => 'on progress',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'project_id' => Str::uuid()->toString(),
-                'project_name' => 'Svarga',
-                'unpaid_amount' => 132000000,
-                'status' => 'Completed',
+                'project_id' => Str::uuid(),
+                'project_name' => 'Pembuatan Sistem Inventory',
+                'unpaid_amount' => 20000000,
+                'status' => 'on progress',
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ];
-
-        foreach ($values as $value) {
-            DB::table('going_projects')->insert($value);
-        }
+            ]
+        ]);
     }
 }

@@ -29,3 +29,4 @@ class GoingProject extends Model
         'unpaid_amount' => 'float',
     ];
 }
+

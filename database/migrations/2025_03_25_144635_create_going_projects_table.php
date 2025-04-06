@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('project_id')->primary();
             $table->string('project_name');
             $table->float('unpaid_amount');
-            $table->string('status', 255);
+            $table->enum('status', ['on progress', 'done', 'cancelled', 'waiting for payment'])->default('on progress');
             $table->timestamps();
         });
     }
