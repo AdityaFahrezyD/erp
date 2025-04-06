@@ -36,7 +36,7 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->unique(table: User::class, column: 'email', ignoreRecord: true),
-                
+
                 TextInput::make('first_name')
                     ->required()
                     ->label('Nama Depan'),
@@ -63,7 +63,7 @@ class UserResource extends Resource
                     ->disk('public')
                     ->directory('user-images')
                     ->required(),
-                
+
 
                 Select::make('role')
                     ->label('User Role')
@@ -129,5 +129,5 @@ class UserResource extends Resource
         $user = Auth::user();
         return $user && in_array($user->role, ['admin', 'owner']);
     }
-    
+
 }
