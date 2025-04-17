@@ -12,16 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('invoice', function (Blueprint $table) {
-            $table->uuid('invoice_id', 64)->primary();
-            $table->char('created_by', 16);
-            $table->string('penerima', 255);
-            $table->string('perusahaan', 255);
-            $table->string('keterangan', 255);
+            $table->uuid('invoice_id')->primary();
+            $table->uuid('project_id');
+            $table->string('penerima');
+            $table->string('perusahaan');
+            $table->string('keterangan');
             $table->integer('harga');
-            $table->string('email_penerima', 255);
-            $table->boolean('tipe', 255);
+            $table->string('email_penerima');
             $table->date('tanggal_kirim');
-            $table->boolean('approve_status');
+            $table->boolean('approve_status')->default(false);
             $table->timestamps();
         });
     }

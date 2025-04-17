@@ -2,25 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
 class Invoice extends Model
 {
-    use HasFactory, HasUuids;
-
+    use HasUuids;
     protected $table = 'invoice';
-
     protected $primaryKey = 'invoice_id';
-
     public $incrementing = false;
-
     protected $keyType = 'string';
 
     protected $fillable = [
-        'invoice_id',
-        'created_by',
+        'project_id',
         'penerima',
         'perusahaan',
         'keterangan',
@@ -31,7 +25,8 @@ class Invoice extends Model
         'approve_status',
     ];
 
-    protected $casts = [
-        'invoice_id' => 'uuid',
-    ];
+    public function project()
+    {
+        return $this->belongsTo(GoingProject::class, 'project_id');
+    }
 }

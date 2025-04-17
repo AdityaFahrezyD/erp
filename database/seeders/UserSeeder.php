@@ -21,13 +21,14 @@ class UserSeeder extends Seeder
                 'name' => 'Admin Texio',
                 'first_name' => 'Admin',
                 'last_name' => 'Texio',
+
                 'password' => Hash::make('admin123'),
-                'images' => 'default.png',
-                'role' => '1', // 1 = Admin, 2 = User, dll.
+                'image' => 'default.png',
+                'role' => 'admin', // 1 = Admin, 2 = finance, 3 = owner.
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
-                'created_by' => Str::random(16),
+
             ],
             [
                 'id' => Str::uuid(),
@@ -35,13 +36,16 @@ class UserSeeder extends Seeder
                 'name' => 'Kurnia Agusta',
                 'first_name' => 'Kurnia',
                 'last_name' => 'Agusta',
+
                 'password' => Hash::make('Agus123'),
                 'images' => 'default.png',
-                'role' => '2', // 1 = Admin, 2 = User, dll.
+                'role' => '2',
+                'image' => 'default.png',
+                'role' => 'finance',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
-                'created_by' => Str::random(16),
+
             ],
             [
                 'id' => Str::uuid(),
@@ -51,11 +55,13 @@ class UserSeeder extends Seeder
                 'last_name' => 'Doe',
                 'password' => Hash::make('Jane123'),
                 'images' => 'default.png',
-                'role' => '2', // 1 = Admin, 2 = User, dll.
+                'role' => '3',
+                'image' => 'default.png',
+                'role' => 'owner',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
-                'created_by' => Str::random(16),
+
             ],
         ]);
     }

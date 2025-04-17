@@ -10,6 +10,8 @@ class InvoiceSeeder extends Seeder
 {
     public function run(): void
     {
+        $projectId = DB::table('going_projects')->first()->project_id;
+
         DB::table('invoice')->insert([
             [
                 'invoice_id' => Str::uuid(),
@@ -52,7 +54,7 @@ class InvoiceSeeder extends Seeder
                 'approve_status' => true,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+            ]
         ]);
     }
 }

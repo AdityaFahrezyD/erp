@@ -10,6 +10,10 @@ class FinanceSeeder extends Seeder
 {
     public function run(): void
     {
+        $invoice = DB::table('invoice')->first();
+        $payroll = DB::table('payroll')->first();
+        $other = DB::table('other_expenses')->first();
+
         DB::table('finance')->insert([
             [
                 'finance_id' => Str::uuid(),
@@ -50,6 +54,18 @@ class FinanceSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'finance_id' => Str::uuid(),
+                'transaction_id' => $other->expense_id,
+                'transaction_type' => 'other',
+                'date' => now(),
+                'description' => 'Pengeluaran operasional ATK',
+                'amount' => $other->jumlah,
+                'saldo' => 2350000,
+                'notes' => 'Tinta printer',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
         ]);
     }
 }

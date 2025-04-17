@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Filament\Panel;
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasUuids;
 
     protected $table = 'users';
@@ -19,25 +22,67 @@ class User extends Authenticatable
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id',
-        'name',
+
         'email',
-        'images',
-        'role',
-        'email_verified_at',
+        'name',
         'first_name',
         'last_name',
         'password',
-        'created_by',
+        'image',
+        'role'
     ];
 
+    // public function getFilamentName(): string
+    // {
+    //     return $this->first_name . ' ' . $this->last_name;
+    // }
+
+    protected static function booted(): void
+    {
+        static::creating(function ($user) {
+            $user->name = trim("{$user->first_name} {$user->last_name}");
+        });
+
+        static::updating(function ($user) {
+            $user->name = trim("{$user->first_name} {$user->last_name}");
+        });
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'id'; // UUID sebagai primary key
+    }
+
+    public function getNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
+    }
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
+    }
 }
