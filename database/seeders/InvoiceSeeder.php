@@ -18,6 +18,7 @@ class InvoiceSeeder extends Seeder
 
             DB::table('invoice')->insert([
                 'invoice_id' => Str::uuid(),
+                'user_id' => $userId,
                 'project_id' => $projectId,
                 'penerima' => 'John Doe',
                 'perusahaan' => 'PT Texio Digital',
@@ -31,6 +32,7 @@ class InvoiceSeeder extends Seeder
             ],
             [
                 'invoice_id' => Str::uuid(),
+                'user_id' => $userId,
                 'project_id' => $projectId,
                 'penerima' => 'Jane Smith',
                 'perusahaan' => 'PT Mitra Digital',
@@ -44,6 +46,7 @@ class InvoiceSeeder extends Seeder
             ],
             [
                 'invoice_id' => Str::uuid(),
+                'user_id' => $userId,
                 'project_id' => $projectId,
                 'penerima' => 'Michael Johnson',
                 'perusahaan' => 'PT Inovasi Digital',

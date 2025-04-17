@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('invoice', function (Blueprint $table) {
             $table->uuid('invoice_id')->primary();
-            $table->uuid('users_id');
+            $table->uuid('user_id');
             $table->uuid('project_id');
             $table->string('penerima');
             $table->string('perusahaan');
