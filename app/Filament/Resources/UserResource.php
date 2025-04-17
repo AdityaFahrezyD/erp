@@ -65,6 +65,7 @@ class UserResource extends Resource
                     ->required(),
 
 
+
                 Select::make('role')
                     ->label('User Role')
                     ->required()

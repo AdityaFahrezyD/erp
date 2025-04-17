@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\User;
 
 class InvoiceSeeder extends Seeder
 {
@@ -12,8 +13,10 @@ class InvoiceSeeder extends Seeder
     {
         $projectId = DB::table('going_projects')->first()->project_id;
 
-        DB::table('invoice')->insert([
-            [
+        foreach (range(1, 20) as $index) {
+            $userId = User::inRandomOrder()->first()->id;
+
+            DB::table('invoice')->insert([
                 'invoice_id' => Str::uuid(),
                 'project_id' => $projectId,
                 'penerima' => 'John Doe',
@@ -48,10 +51,10 @@ class InvoiceSeeder extends Seeder
                 'harga' => 6200000,
                 'email_penerima' => 'michael@example.com',
                 'tanggal_kirim' => now(),
-                'approve_status' => true,
+                'approve_status' => $index % 2 == 0,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
-        ]);
+            ]);
+        }
     }
 }
