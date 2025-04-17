@@ -13,12 +13,10 @@ class PayrollSeeder extends Seeder
         DB::table('payroll')->insert([
             [
                 'payroll_id' => Str::uuid()->toString(),
-                'created_by' => '1234567890123456',
                 'penerima' => 'Budi Santoso',
                 'keterangan' => 'Gaji bulan Maret 2025',
                 'harga' => 5000000,
                 'email_penerima' => 'budi@example.com',
-                'tipe' => true, // Misal true = Gaji, false = Bonus
                 'tanggal_kirim' => '2025-03-30',
                 'approve_status' => true, // true = Disetujui, false = Ditolak
                 'created_at' => now(),
@@ -26,12 +24,10 @@ class PayrollSeeder extends Seeder
             ],
             [
                 'payroll_id' => Str::uuid()->toString(),
-                'created_by' => '9876543210987654',
                 'penerima' => 'Siti Aminah',
                 'keterangan' => 'Bonus akhir tahun',
                 'harga' => 2000000,
                 'email_penerima' => 'siti@example.com',
-                'tipe' => false,
                 'tanggal_kirim' => '2025-12-31',
                 'approve_status' => true,
                 'created_at' => now(),
