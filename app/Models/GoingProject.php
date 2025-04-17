@@ -15,6 +15,7 @@ class GoingProject extends Model
     protected $primaryKey = 'project_id';
 
     public $incrementing = false;
+    
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -25,7 +26,6 @@ class GoingProject extends Model
     ];
 
     protected $casts = [
-        'project_id' => 'uuid',
         'unpaid_amount' => 'float',
     ];
 }
