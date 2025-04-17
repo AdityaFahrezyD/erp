@@ -6,26 +6,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class GoingProject extends Model
+class Payroll extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $table = 'going_projects';
+    protected $table = 'payroll';
 
-    protected $primaryKey = 'project_id';
+    protected $primaryKey = 'payroll_id';
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
-        'project_id',
-        'project_name',
-        'unpaid_amount',
-        'status',
+        'payroll_id',
+        'created_by',
+        'penerima',
+        'keterangan',
+        'harga',
+        'email_penerima',
+        'tipe',
+        'tanggal_kirim',
+        'approve_status',
     ];
 
     protected $casts = [
-        'project_id' => 'uuid',
-        'unpaid_amount' => 'float',
+        'payroll_id' => 'uuid',
     ];
 }

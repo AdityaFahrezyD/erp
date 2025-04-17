@@ -4,17 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
-class GoingProject extends Model
+class Project extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory;
 
-    protected $table = 'going_projects';
+    protected $table = 'project';
 
     protected $primaryKey = 'project_id';
 
     public $incrementing = false;
+
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -22,10 +22,6 @@ class GoingProject extends Model
         'project_name',
         'unpaid_amount',
         'status',
-    ];
-
-    protected $casts = [
-        'project_id' => 'uuid',
-        'unpaid_amount' => 'float',
+        'created_by',
     ];
 }
