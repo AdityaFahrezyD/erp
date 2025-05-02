@@ -15,13 +15,15 @@ return new class extends Migration
             $table->uuid('invoice_id')->primary();
             $table->uuid('user_id');
             $table->uuid('project_id');
-            $table->string('penerima');
-            $table->string('perusahaan');
-            $table->string('keterangan');
-            $table->integer('harga');
-            $table->string('email_penerima');
-            $table->date('tanggal_kirim');
-            $table->boolean('approve_status')->default(false);
+            $table->string('recipient');
+            $table->string('company')->nullable();
+            $table->string('information');
+            $table->bigInteger('invoice_amount');
+            $table->string('recipient_email');
+            $table->date('send_date');
+            $table->boolean('is_repeat')->default(false);
+            $table->timestamp('sent_at')->nullable();
+            $table->enum('approve_status', ['pending', 'approved', 'declined'])->default('pending');
             $table->timestamps();
         });
     }

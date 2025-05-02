@@ -14,24 +14,26 @@ class Invoice extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'user_id',
         'project_id',
-        'penerima',
-        'perusahaan',
-        'keterangan',
-        'harga',
-        'email_penerima',
-        'tipe',
-        'tanggal_kirim',
+        'recipient',
+        'company',
+        'information',
+        'invoice_amount',
+        'recipient_email',
+        'is_repeat',
+        'send_date',
+        'send_at',
         'approve_status',
     ];
 
     public function project()
     {
-        return $this->belongsTo(GoingProject::class, 'project_id');
+        return $this->belongsTo(GoingProject::class, 'project_id', 'project_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'users_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }
