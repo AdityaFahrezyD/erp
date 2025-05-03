@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('payroll', function (Blueprint $table) {
             $table->uuid('payroll_id')->primary();
+            $table->uuid('user_id');
             $table->string('penerima');
             $table->string('keterangan');
             $table->integer('harga');
             $table->string('email_penerima');
             $table->date('tanggal_kirim');
-            $table->boolean('approve_status')->default(false);
+            $table->boolean('is_repeat')->default(false);
+            $table->timestamp('sent_at')->nullable();
+            $table->enum('approve_status', ['pending', 'approved', 'declined'])->default('pending');
             $table->timestamps();
         });
     }
