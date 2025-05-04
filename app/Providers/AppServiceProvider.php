@@ -8,6 +8,7 @@ use Filament\Http\Responses\Auth\LoginResponse;
 use Filament\Http\Responses\Auth\LogoutResponse;
 use App\Http\Responses\LoginResponses;
 use App\Http\Responses\LogoutResponses;
+use Illuminate\Console\Scheduling\Schedule;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +31,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::unguard();
+
+        $this->app->booted(function () {
+            $schedule = app(Schedule::class);
+            $schedule->command('payrolls:send')->dailyAt('23:00');
+        });
     }
 }
