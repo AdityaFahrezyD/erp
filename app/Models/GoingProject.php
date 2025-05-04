@@ -19,7 +19,6 @@ class GoingProject extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'project_id',
         'project_name',
         'unpaid_amount',
         'status',
@@ -28,5 +27,9 @@ class GoingProject extends Model
     protected $casts = [
         'unpaid_amount' => 'float',
     ];
+
+    public function invoices() {
+        return $this->hasMany(Invoice::class, 'project_id', 'project_id');
+    }
 }
 
