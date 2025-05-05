@@ -14,23 +14,24 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Menggunakan UUID sebagai primary key sesuai dengan schema tabel users
         DB::table('users')->insert([
             [
-                'id' => Str::uuid(),
+                'id' => Str::uuid()->toString(), // UUID sebagai primary key
                 'email' => 'admin@example.com',
                 'name' => 'Admin Texio',
                 'first_name' => 'Admin',
                 'last_name' => 'Texio',
                 'password' => Hash::make('admin123'),
                 'image' => 'default.png',
-                'role' => 'admin', // 1 = Admin, 2 = finance, 3 = owner.
+                'role' => 'admin', // admin, owner, finance, staff
                 'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
-
             ],
             [
-                'id' => Str::uuid(),
+                'id' => Str::uuid()->toString(),
                 'email' => 'user@example.com',
                 'name' => 'Kurnia Agusta',
                 'first_name' => 'Kurnia',
@@ -39,11 +40,12 @@ class UserSeeder extends Seeder
                 'image' => 'default.png',
                 'role' => 'finance',
                 'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'id' => Str::uuid(),
+                'id' => Str::uuid()->toString(),
                 'email' => 'jane.doe@example.com',
                 'name' => 'Jane Doe',
                 'first_name' => 'Jane',
@@ -52,9 +54,26 @@ class UserSeeder extends Seeder
                 'image' => 'default.png',
                 'role' => 'owner',
                 'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => Str::uuid()->toString(),
+                'email' => 'regular@example.com',
+                'name' => 'Regular User',
+                'first_name' => 'Regular',
+                'last_name' => 'User',
+                'password' => Hash::make('user123'),
+                'image' => 'default.png',
+                'role' => 'staff', // Mengganti 'user' ke 'staff' sesuai dengan enum di migrasi
+                'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ]);
+
+        $this->command->info('Data user berhasil ditambahkan!');
     }
 }

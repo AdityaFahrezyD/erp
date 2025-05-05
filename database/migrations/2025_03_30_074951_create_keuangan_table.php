@@ -11,16 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('finance', function (Blueprint $table) {
-            $table->uuid('finance_id')->primary();
-            $table->uuid('transaction_id');
-            $table->enum('transaction_type', ['invoice', 'payroll', 'other']);
+        Schema::create('finances', function (Blueprint $table) {
+            $table->id(); // Tambahkan auto-increment ID 
+            $table->uuid('finance_id')->unique(); // Ubah dari primary ke unique
+            $table->string('transaction_id')->unique(); // Ubah dari uuid ke string
+            $table->uuid('user_id');
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->enum('type', ['invoice', 'payroll', 'other']);
             $table->date('date');
             $table->string('description');
-            $table->integer('amount');
-            $table->integer('saldo');
-            $table->string('notes')->nullable();
+            $table->decimal('amount', 15, 2); // Ubah dari integer ke decimal untuk nilai uang
+            $table->decimal('saldo', 15, 2); // Ubah dari integer ke decimal untuk nilai uang
+            $table->text('notes')->nullable(); // Ubah dari string ke text untuk catatan panjang
+            $table->tinyInteger('status_pembayaran')->default(0); // 0=Belum Dibayar, 1=Sudah Dibayar
+            $table->tinyInteger('approve_status')->default(0); // 0=Menunggu, 1=Disetujui, 2=Ditolak
             $table->timestamps();
+            $table->softDeletes(); // Tambahkan soft delete jika diperlukan
         });
     }
 
@@ -29,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('finance');
+        Schema::dropIfExists('finances');
     }
 };
