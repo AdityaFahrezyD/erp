@@ -35,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = app(Schedule::class);
             $schedule->command('payrolls:send')->dailyAt('23:00');
+            $schedule->command('invoices:send')->dailyAt('23:00');
         });
     }
 }

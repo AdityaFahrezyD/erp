@@ -29,7 +29,7 @@ class InvoiceResource extends Resource
 {
     protected static ?string $model = Invoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-document';
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
@@ -48,8 +48,11 @@ class InvoiceResource extends Resource
     public static function form(Form $form): Form
     {
         $panelId = Filament::getCurrentPanel()?->getId();
-        $isReadonly = $panelId === 'finance' || $form->getRecord()->approve_status !== 'pending';
+        $isReadonly = $panelId === 'finance';
         $isCreate = blank($form->getRecord());
+        if (!$isCreate && !$isReadonly) {
+            $isReadonly = $form->getRecord()->approve_status !== 'pending';
+        }
         $isEdit = filled($form->getRecord());
 
         return $form->schema(array_filter([
@@ -142,11 +145,26 @@ class InvoiceResource extends Resource
         $panelId = Filament::getCurrentPanel()?->getId();
 
         $columns = [
+            TextColumn::make('no')
+                ->label('No')
+                ->state(function ($record, $livewire) {
+                    $records = $livewire->getTableRecords();
+                    $index = $records->search(fn ($item) => $item->getKey() === $record->getKey());
+                    return ((int)$livewire->getTablePage() - 1) * (int)$livewire->getTableRecordsPerPage() + $index + 1;
+                })
+                ->alignCenter(),
+
             TextColumn::make('information')->label('Invoice Name')->searchable(),
             TextColumn::make('recipient')->searchable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('invoice_amount')->label('Amount')->money('IDR', locale: 'id')->sortable(),
             TextColumn::make('is_repeat')->label('Type')->formatStateUsing(fn ($state) => $state ? 'Repeat Monthly' : 'One-Time'),
-            TextColumn::make('approve_status')->label('Status'),
+            TextColumn::make('approve_status')->label('Status')->badge()
+                ->color(fn (string $state): string => match ($state) {
+                    'pending' => 'warning',
+                    'approved' => 'success',
+                    'declined' => 'danger',
+                    default => 'gray',
+                }),
             TextColumn::make('created_at')->dateTime()->label('Created At')->sortable()->toggleable(),
         ];
 
@@ -163,17 +181,19 @@ class InvoiceResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('approveBulk')
-                        ->label('Approve All')
+                        ->label('Approve selected')
                         ->action(fn ($records) => $records->each(fn ($record) =>
                             $record->update(['approve_status' => 'approved'])
                         ))
+                        ->requiresConfirmation()
                         ->color('success')
                         ->icon('heroicon-m-check'),
                     Tables\Actions\BulkAction::make('declineBulk')
-                        ->label('Decline All')
+                        ->label('Decline selected')
                         ->action(fn ($records) => $records->each(fn ($record) =>
                             $record->update(['approve_status' => 'declined'])
                         ))
+                        ->requiresConfirmation()
                         ->color('danger')
                         ->icon('heroicon-m-x-mark'),
                 ]),
