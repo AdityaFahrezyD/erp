@@ -11,6 +11,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Collection;
 
 class PayrollResource extends Resource
 {
@@ -57,10 +58,6 @@ class PayrollResource extends Resource
             Forms\Components\Checkbox::make('is_repeat')
                 ->label('Kirim Ulang Setiap Bulan')
                 ->default(false),
-            // Menambahkan fitur cronjob hanya untuk role selain owner
-            auth()->user()->role !== 'owner'
-                ? Forms\Components\TextInput::make('cronjob')->label('Cronjob')->required()
-                : null,
         ]);
     }
 
@@ -77,11 +74,12 @@ class PayrollResource extends Resource
                 Tables\Columns\TextColumn::make('tanggal_kirim')->date(),
                 Tables\Columns\BadgeColumn::make('approve_status')
                     ->label('Status Persetujuan')
-                    ->colors([
-                        'pending' => 'warning',
+                    ->color(fn (string $state): string => match ($state) {
                         'approved' => 'success',
+                        'pending' => 'warning',
                         'declined' => 'danger',
-                    ])
+                        default => 'gray',
+                    })
                     ->formatStateUsing(function (string $state): string {
                         return match ($state) {
                             'pending' => 'Pending',
@@ -91,14 +89,46 @@ class PayrollResource extends Resource
                         };
                     }),
             ])
-            ->filters([/* Additional filters can be added here */])
+            ->filters([
+                Tables\Filters\SelectFilter::make('approve_status')
+                    ->label('Status Persetujuan')
+                    ->options([
+                        'pending' => 'Pending',
+                        'approved' => 'Approved',
+                        'declined' => 'Declined',
+                    ]),
+
+                Tables\Filters\Filter::make('tanggal_kirim')
+                    ->form([
+                        Forms\Components\DatePicker::make('from')->label('Dari Tanggal'),
+                        Forms\Components\DatePicker::make('until')->label('Sampai Tanggal'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate('tanggal_kirim', '>=', $data['from']))
+                            ->when($data['until'], fn ($q) => $q->whereDate('tanggal_kirim', '<=', $data['until']));
+                    }),
+
+                Tables\Filters\TernaryFilter::make('is_repeat')
+                    ->label('Kirim Ulang')
+                    ->trueLabel('Ya')
+                    ->falseLabel('Tidak'),
+
+                Tables\Filters\Filter::make('email_penerima')
+                    ->form([
+                        Forms\Components\TextInput::make('email')->label('Email Penerima'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['email'], fn ($q) => $q->where('email_penerima', 'like', "%{$data['email']}%"));
+                    }),
+            ])
             ->actions([Tables\Actions\EditAction::make()])
             ->headerActions([
                 Tables\Actions\Action::make('export_all_pdf')
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
-                        $payrolls = Payroll::all();
+                        $payrolls = Payroll::where('user_id', auth()->id())->get();
                         $pdf = Pdf::loadView('exports.payrolls', ['payrolls' => $payrolls])->setPaper('a4', 'landscape');
 
                         return response()->streamDownload(function () use ($pdf) {
@@ -106,7 +136,20 @@ class PayrollResource extends Resource
                         }, 'Data Payroll.pdf');
                     }),
             ])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->bulkActions([
+                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\BulkAction::make('approve_all')
+                    ->label('Setujui Semua')
+                    ->icon('heroicon-o-check-badge')
+                    ->requiresConfirmation()
+                    ->action(function (Collection $records) {
+                        foreach ($records as $record) {
+                            $record->update(['approve_status' => 'approved']);
+                        }
+                    })
+                    ->deselectRecordsAfterCompletion(),
+                ]);
+
     }
 
     public static function getEloquentQuery(): Builder
