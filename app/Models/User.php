@@ -98,4 +98,8 @@ class User extends Authenticatable implements FilamentUser
     public function invoices() {
         return $this->hasMany(Invoice::class, 'user_id', 'id');
     }
+
+    public function user() {
+        return $this->hasMany(ProjectStaff::class, 'id_user');
+    }
 }

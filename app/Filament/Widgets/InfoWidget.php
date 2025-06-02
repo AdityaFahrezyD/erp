@@ -15,7 +15,7 @@ class InfoWidget extends BaseWidget
         $latestSaldo = Finance::orderByDesc('created_at')->value('saldo') ?? 0;
 
         // Total piutang (dari proyek yang belum dibayar)
-        $totalPiutang = GoingProject::whereIn('status', ['on progress', 'waiting for payment'])
+        $totalPiutang = GoingProject::whereIn('status', ['on progress', 'waiting for payment','pending'])
             ->sum('unpaid_amount') ?? 0;
 
         // Total saldo + piutang

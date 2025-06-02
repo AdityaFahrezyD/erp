@@ -24,6 +24,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Facades\Filament;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Support\Facades\Request;
+use Filament\Forms\Get;
+use App\Models\ProjectModul;
+
+
 
 class InvoiceResource extends Resource
 {
@@ -63,7 +68,7 @@ class InvoiceResource extends Resource
                     ->label('Invoice Name')
                     ->content(fn ($record) => $record->information)
                 : TextInput::make('information')
-                    ->label('Invoice Name')
+                    ->label('Information')
                     ->required(),
 
             $isReadonly && !$isCreate
@@ -75,7 +80,47 @@ class InvoiceResource extends Resource
                     ->relationship('project', 'project_name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->default(Request::input('project_id'))
+                    ->reactive()
+                    ->afterStateUpdated(fn ($state, callable $set) => $set('modul_id', null)),
+
+            $isReadonly && !$isCreate
+                ? Placeholder::make('modul_id')
+                    ->label('Modul Name')
+                    ->content(fn ($record) => optional($record->modul)->modul_name ?? '-')
+                : Select::make('modul_id')
+                    ->label('Modul Name')
+                    ->options(function (Get $get) {
+                        $projectId = $get('project_id');
+                        if (!$projectId) return [];
+                        return \App\Models\ProjectModul::where('project_id', $projectId)->pluck('nama_modul', 'id');
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->disabled(fn (Get $get) => ! $get('project_id'))
+                    ->default(Request::input('modul_id'))
+                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
+                        if (!$state) return;
+                        $modul = ProjectModul::find($state);
+                        $set('unpaid_amount', $modul?->unpaid_amount ?? 0);
+                    }),
+
+            TextInput::make('unpaid_amount')
+                ->label('Sisa Tagihan')
+                ->numeric()
+                ->disabled()
+                ->dehydrated(false)
+                ->reactive()
+                ->default(0) // Default awal saja
+                ->afterStateHydrated(function (\Filament\Forms\Set $set, ?string $state, Get $get) { // Corrected type hint here
+                    $modulId = $get('modul_id');
+                    if (!$modulId) return;
+                    $modul = ProjectModul::find($modulId);
+                    $set('unpaid_amount', $modul?->unpaid_amount ?? 0);
+                }),
+
 
             $isReadonly && !$isCreate
                 ? Placeholder::make('recipient')
@@ -110,7 +155,12 @@ class InvoiceResource extends Resource
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(',')
                     ->minValue(0)
-                    ->required(),
+                    ->required()
+                    ->maxValue(function (Get $get) {
+                        $modul = \App\Models\ProjectModul::find($get('modul_id'));
+                        return $modul?->unpaid_amount;
+                    }),
+
 
             $isReadonly && !$isCreate
                 ? Placeholder::make('is_repeat')
@@ -153,7 +203,9 @@ class InvoiceResource extends Resource
                     return ((int)$livewire->getTablePage() - 1) * (int)$livewire->getTableRecordsPerPage() + $index + 1;
                 })
                 ->alignCenter(),
-
+            Tables\Columns\TextColumn::make('going_projects.project_name')->label('Project')->searchable(),
+            
+            Tables\Columns\TextColumn::make('modul.nama_modul')->label('Modul')->searchable(),
             TextColumn::make('information')->label('Invoice Name')->searchable(),
             TextColumn::make('recipient')->searchable()->toggleable(isToggledHiddenByDefault: true),
             TextColumn::make('invoice_amount')->label('Amount')->money('IDR', locale: 'id')->sortable(),

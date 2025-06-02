@@ -62,9 +62,7 @@ class UserResource extends Resource
                     ->image()
                     ->disk('public')
                     ->directory('user-images')
-                    ->required(),
-
-
+                    ->nullable(),
 
                 Select::make('role')
                     ->label('User Role')

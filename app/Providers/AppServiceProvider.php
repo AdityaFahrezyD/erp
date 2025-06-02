@@ -9,6 +9,8 @@ use Filament\Http\Responses\Auth\LogoutResponse;
 use App\Http\Responses\LoginResponses;
 use App\Http\Responses\LogoutResponses;
 use Illuminate\Console\Scheduling\Schedule;
+use App\Models\Invoice;
+use App\Observers\InvoiceObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Invoice::observe(InvoiceObserver::class);
         Model::unguard();
 
         $this->app->booted(function () {
