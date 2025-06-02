@@ -17,12 +17,14 @@ class Finance extends Model
         'user_id',
         'type',
         'date',
-        'description',
         'amount',
         'saldo',
         'status_pembayaran',
         'approve_status',
         'notes',
+        'fk_invoice_id',
+        'fk_payroll_id',
+        'judul_transaksi',
     ];
 
     protected $casts = [
@@ -121,5 +123,14 @@ class Finance extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class, 'fk_invoice_id');
+    }
+
+    public function payroll()
+    {
+        return $this->belongsTo(Payroll::class, 'fk_payroll_id');
     }
 }
