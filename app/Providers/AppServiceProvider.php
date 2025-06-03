@@ -9,8 +9,10 @@ use Filament\Http\Responses\Auth\LogoutResponse;
 use App\Http\Responses\LoginResponses;
 use App\Http\Responses\LogoutResponses;
 use Illuminate\Console\Scheduling\Schedule;
-use App\Models\Invoice;
 use App\Observers\InvoiceObserver;
+use App\Observers\PayrollObserver;
+use App\Models\Invoice;
+use App\Models\Payroll;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,5 +42,8 @@ class AppServiceProvider extends ServiceProvider
             $schedule->command('payrolls:send')->dailyAt('23:00');
             $schedule->command('invoices:send')->dailyAt('23:00');
         });
+
+        Invoice::observe(InvoiceObserver::class);
+        Payroll::observe(PayrollObserver::class);
     }
 }
