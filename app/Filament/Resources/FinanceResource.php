@@ -69,6 +69,7 @@ class FinanceResource extends Resource
             Select::make('type')
                 ->label('Tipe Transaksi')
                 ->required()
+                ->reactive()
                 ->options([
                     'invoice' => 'Invoice',
                     'payroll' => 'Payroll',
@@ -79,11 +80,53 @@ class FinanceResource extends Resource
                 ->label('Tanggal Transaksi')
                 ->required()
                 ->default(now()),
-        
-            TextInput::make('description')
-                ->label('Deskripsi')
+
+            // Field untuk pilih judul berdasarkan tipe
+            Select::make('judul_transaksi')
+                ->label('Judul Transaksi')
+                ->options(function (callable $get) {
+                    $type = $get('type');
+
+                    if ($type === 'invoice') {
+                        return \App\Models\Invoice::pluck('information', 'invoice_id');
+                    }
+
+                    if ($type === 'payroll') {
+                        return \App\Models\Payroll::pluck('keterangan', 'payroll_id');
+                    }
+
+                    if ($type === 'other') {
+                        return [
+                            'transportasi' => 'Transportasi',
+                            'pembelian_kebutuhan' => 'Pembelian Kebutuhan',
+                            'dll' => 'Dll',
+                        ];
+                    }
+
+                    return [];
+                })
                 ->required()
-                ->maxLength(255),
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    $type = $get('type');
+
+                    if ($type === 'invoice') {
+                        $set('fk_invoice_id', $state);
+                        $set('fk_payroll_id', null);
+                    } elseif ($type === 'payroll') {
+                        $set('fk_payroll_id', $state);
+                        $set('fk_invoice_id', null);
+                    } else {
+                        $set('fk_invoice_id', null);
+                        $set('fk_payroll_id', null);
+                    }
+                })
+                ->hidden(fn (callable $get) => $get('type') === null)
+                ->placeholder('Pilih judul berdasarkan tipe transaksi'),
+
+            // Hidden fields untuk simpan ke kolom fk
+            Hidden::make('fk_invoice_id')->dehydrated(),
+            Hidden::make('fk_payroll_id')->dehydrated(),
         
             TextInput::make('amount')
                 ->label('Amount')
@@ -152,17 +195,26 @@ class FinanceResource extends Resource
                         'payroll' => 'warning',
                         'other' => 'gray',
                     }),
+                
+                TextColumn::make('judul_transaksi')
+                    ->label('Judul Transaksi')
+                    ->getStateUsing(function ($record) {
+                        return match ($record->type) {
+                            'invoice' => optional($record->invoice)->information, // sesuaikan nama kolom
+                            'payroll' => optional($record->payroll)->keterangan, // sesuaikan nama kolom
+                            'other' => $record->description, // untuk other, ambil dari deskripsi atau buat kolom sendiri
+                            default => '-',
+                        };
+                    })
+                    ->searchable()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('date')
                     ->label('Tanggal')
                     ->date('d M Y')
                     ->searchable()
                     ->sortable(),
-
-                TextColumn::make('description')
-                    ->label('Deskripsi')
-                    ->limit(30)
-                    ->searchable(),
 
                 TextColumn::make('amount')
                     ->label('Jumlah')
