@@ -13,10 +13,28 @@ class OtherExpense extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'kategori',
+        'type_expense',
+        'user_id',
+        'fk_project_id',
+        'judul_project',
+        'nama_pengeluaran',
         'keterangan',
-        'harga',
-        'tanggal_pengeluaran',
+        'jumlah',
+        'tanggal',
         'approve_status',
     ];
+    protected $casts = [
+        'tanggal' => 'date',
+        'jumlah' => 'decimal:2',
+        'approve_status' => 'string',
+    ];
+
+    public function going_project()
+    {
+        return $this->belongsTo(GoingProject::class, 'fk_project_id');
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'user_id');
+    }
 }
