@@ -34,8 +34,8 @@ class PayrollObserver
                     'fk_payroll_id' => $payroll->payroll_id,
                     'judul_transaksi' => $payroll->payroll_id,
                     'date' => $payroll->tanggal_kirim,
-                    'notes' => 'Payroll: ' . $payroll->keterangan,
-                    'amount' => -$payroll->harga,
+                    'notes' => 'Payroll: ' . $payroll->adjustment_desc,
+                    'amount' => -$payroll->net_salary,
                     'status_pembayaran' => 1, // Sudah dibayar
                     'approve_status' => 1, // Sudah di-approve
                 ]);
