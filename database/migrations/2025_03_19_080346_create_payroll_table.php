@@ -14,15 +14,18 @@ return new class extends Migration
         Schema::create('payroll', function (Blueprint $table) {
             $table->uuid('payroll_id')->primary();
             $table->uuid('user_id');
-            $table->string('penerima');
-            $table->string('keterangan');
-            $table->integer('harga');
+            $table->uuid('fk_pegawai_id');
+            $table->decimal('gross_salary', 15, 2); //Gaji kotor untuk periode tersebut.
+            $table->decimal('net_salary', 15, 2); //Gaji bersih setelah pemotongan dan bonus.
             $table->string('email_penerima');
             $table->date('tanggal_kirim');
-            $table->boolean('is_repeat')->default(false);
+            $table->boolean('adjustment')->default(false);
+            $table->text('adjustment_desc');
             $table->timestamp('sent_at')->nullable();
             $table->enum('approve_status', ['pending', 'approved', 'declined'])->default('pending');
             $table->timestamps();
+
+            $table->foreign('fk_pegawai_id')->references('pegawai_id')->on('pegawai');
         });
     }
 

@@ -24,6 +24,7 @@ class Finance extends Model
         'notes',
         'fk_invoice_id',
         'fk_payroll_id',
+        'fk_expense_id',
         'judul_transaksi',
     ];
 
@@ -132,5 +133,10 @@ class Finance extends Model
     public function payroll()
     {
         return $this->belongsTo(Payroll::class, 'fk_payroll_id');
+    }
+
+    public function other_expense()
+    {
+        return $this->belongsTo(OtherExpense::class, 'fk_expense_id');
     }
 }

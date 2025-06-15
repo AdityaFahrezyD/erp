@@ -11,8 +11,10 @@ use App\Http\Responses\LogoutResponses;
 use Illuminate\Console\Scheduling\Schedule;
 use App\Observers\InvoiceObserver;
 use App\Observers\PayrollObserver;
+use App\Observers\OtherExpenseObserver;
 use App\Models\Invoice;
 use App\Models\Payroll;
+use App\Models\OtherExpense;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -45,5 +47,6 @@ class AppServiceProvider extends ServiceProvider
 
         Invoice::observe(InvoiceObserver::class);
         Payroll::observe(PayrollObserver::class);
+        OtherExpense::observe(OtherExpenseObserver::class);
     }
 }
