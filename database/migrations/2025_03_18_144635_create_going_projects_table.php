@@ -14,7 +14,16 @@ return new class extends Migration {
             $table->double('total_harga_proyek')->nullable();
             $table->double('unpaid_amount')->nullable()->default(0);
             $table->enum('status', ['pending','on progress', 'done', 'cancelled', 'waiting for payment'])->default('on progress');
+            $table->date('batas_awal')->nullable();
+            $table->date('batas_akhir')->nullable();
+            $table->double('harga_awal')->nullable();
+            $table->string('company');
+            $table->string('pic');
+            $table->string('pic_email');
+            $table->uuid('project_leader');
             $table->timestamps();
+
+            $table->foreign('project_leader')->references('id')->on('users')->onDelete('cascade');
         });
 
         // Tabel project_modul
@@ -70,6 +79,7 @@ return new class extends Migration {
         Schema::dropIfExists('project_leader_staff');
         Schema::dropIfExists('project_staff');
         Schema::dropIfExists('project_payment');
+        Schema::dropIfExists('sub_modul');
         Schema::dropIfExists('project_modul');
         Schema::dropIfExists('going_projects');
 

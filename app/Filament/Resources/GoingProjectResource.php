@@ -16,6 +16,8 @@ use App\Filament\Resources\GoingProjectResource\RelationManagers;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\ModulesRelationManager;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\StaffRelationManager;
+use App\Models\User;
+
 
 class GoingProjectResource extends Resource
 {
@@ -27,33 +29,92 @@ class GoingProjectResource extends Resource
 
     public static function form(Form $form): Form
     {
-                
         return $form
             ->schema([
-                Forms\Components\TextInput::make('project_name'),
+                Forms\Components\TextInput::make('project_name')
+                    ->label('Nama Project')
+                    ->required()
+                    ->maxLength(255),
+
+                Forms\Components\TextInput::make('company')
+                    ->label('Nama Perusahaan')
+                    ->required()
+                    ->maxLength(255),
+
+                Forms\Components\TextInput::make('pic')
+                    ->label('PIC')
+                    ->required()
+                    ->maxLength(255),
+
+                Forms\Components\TextInput::make('pic_email')
+                    ->label('Email PIC')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+
+            Forms\Components\Select::make('project_leader')
+                ->label('Project Leader')
+                ->options(function () {
+                    return User::where('role', 'staff')
+                        ->get()
+                        ->mapWithKeys(fn ($user) => [$user->id => $user->name]);
+                })
+                ->searchable()
+                ->preload()
+                ->required(),
+
+
+                Forms\Components\DatePicker::make('batas_awal')
+                    ->label('Batas Awal')
+                    ->required(),
+
+                    
+                Forms\Components\DatePicker::make('batas_akhir')
+                    ->label('Batas Akhir')
+                    ->required(),
+
+                Forms\Components\TextInput::make('harga_awal')
+                    ->label('Harga Awal Proyek')
+                    ->numeric()
+                    ->prefix('Rp'),
+
+                Forms\Components\TextInput::make('total_harga_proyek')
+                    ->label('Total Harga Proyek')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->disabled()
+                    ->reactive(),
+
                 Forms\Components\Select::make('status')
-                ->label('Status Project')
-                ->required()
-                ->options([
-                     'pending' => 'pending',
-                     'on progress' => 'on progress',
-                     'done' => 'done',
-                     'cancelled' => 'cancelled',
-                     'waiting for payment' => 'waiting for payment'
-                ])
-                 ->default('pending')
-                 ->required(),
-                ]);
-            
+                    ->label('Status Project')
+                    ->options([
+                        'pending' => 'Pending',
+                        'on progress' => 'On Progress',
+                        'done' => 'Done',
+                        'cancelled' => 'Cancelled',
+                        'waiting for payment' => 'Waiting for Payment',
+                    ])
+                    ->default('pending')
+                    ->required(),
+            ]);
     }
+
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('project_name'),
+                Tables\Columns\TextColumn::make('harga_awal')->money('IDR'),
                 Tables\Columns\TextColumn::make('total_harga_proyek')->money('IDR'),
                 Tables\Columns\TextColumn::make('unpaid_amount')->money('IDR'),
+                Tables\Columns\TextColumn::make('leader.name')
+                    ->label('Project Leader')
+                    ->searchable()
+                    ->sortable(),
+
+                Tables\Columns\TextColumn::make('batas_awal'),
+                Tables\Columns\TextColumn::make('batas_akhir'),
                 Tables\Columns\TextColumn::make('status')
                 ->label('Status Proyek')
                     ->badge()

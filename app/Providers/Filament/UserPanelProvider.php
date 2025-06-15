@@ -33,7 +33,7 @@ class UserPanelProvider extends PanelProvider
             ])
             ->discoverResources(in: app_path('Filament/User/Resources'), for: 'App\\Filament\\User\\Resources')
             ->resources([
-                \App\Filament\Resources\FinanceResource::class,])
+                ])
             ->discoverPages(in: app_path('Filament/User/Pages'), for: 'App\\Filament\\User\\Pages')
             ->pages([
                 Pages\Dashboard::class,

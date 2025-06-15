@@ -128,6 +128,7 @@ class InvoiceResource extends Resource
                     ->content(fn ($record) => $record->recipient)
                 : TextInput::make('recipient')
                     ->label('Recipient')
+                    ->default(Request::input('recipient'))
                     ->required(),
 
             $isReadonly && !$isCreate
@@ -135,6 +136,7 @@ class InvoiceResource extends Resource
                     ->label('Company Name')
                     ->content(fn ($record) => $record->company)
                 : TextInput::make('company')
+                    ->default(Request::input('company'))
                     ->label('Company Name'),
 
             $isReadonly && !$isCreate
@@ -143,6 +145,7 @@ class InvoiceResource extends Resource
                     ->content(fn ($record) => $record->recipient_email)
                 : TextInput::make('recipient_email')
                     ->label('Recipient Email')
+                    ->default(Request::input('recipient_email'))
                     ->required(),
 
             $isReadonly && !$isCreate

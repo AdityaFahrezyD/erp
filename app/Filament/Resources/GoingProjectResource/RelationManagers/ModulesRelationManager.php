@@ -79,8 +79,12 @@ class ModulesRelationManager extends RelationManager
                     ->url(fn ($record) => route('filament.' . Filament::getCurrentPanel()->getId() . '.resources.invoices.create', [
                         'project_id' => $record->project_id,
                         'modul_id' => $record->id,
+                        'company' => $record->project->company, 
+                        'recipient' => $record->project->pic,
+                        'recipient_email' => $record->project->pic_email,
                     ]))
                     ->color('success')
+
             ])
             ->headerActions([
                 CreateAction::make()
@@ -148,14 +152,4 @@ class ModulesRelationManager extends RelationManager
         ]);
     }
 
-
-
-
-    public static function getRelations(): array
-    {
-        return [
-            \App\Filament\Resources\GoingProjectResource\RelationManagers\ModulesRelationManager\PaymentsRelationManager::class,
-            \App\Filament\Resources\GoingProjectResource\RelationManagers\ModulesRelationManager\StaffRelationManager::class,
-        ];
-    }
 }

@@ -21,6 +21,13 @@ class GoingProject extends Model
         'total_harga_proyek',
         'unpaid_amount',
         'status',
+        'batas_awal',
+        'batas_akhir',
+        'harga_awal',
+        'company',
+        'pic',
+        'pic_email',
+        'project_leader',
     ];
 
     public function modules()
@@ -41,4 +48,8 @@ class GoingProject extends Model
         return $this->hasMany(ProjectStaff::class);
     }
 
+    public function leader()
+    {
+        return $this->belongsTo(User::class, 'project_leader');
+    }
 }

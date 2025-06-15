@@ -60,9 +60,39 @@ class UserSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid()->toString(),
-                'email' => 'regular@example.com',
-                'name' => 'Regular User',
-                'first_name' => 'Regular',
+                'email' => 'regular1@example.com',
+                'name' => 'Adit Fahrezy',
+                'first_name' => 'Adit',
+                'last_name' => 'Fahrezy',
+                'password' => Hash::make('user123'),
+                'image' => 'default.png',
+                'role' => 'staff', // Mengganti 'user' ke 'staff' sesuai dengan enum di migrasi
+                'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+                        [
+                'id' => Str::uuid()->toString(),
+                'email' => 'regular2@example.com',
+                'name' => 'Regular2 User',
+                'first_name' => 'Regular2',
+                'last_name' => 'User',
+                'password' => Hash::make('user123'),
+                'image' => 'default.png',
+                'role' => 'staff', // Mengganti 'user' ke 'staff' sesuai dengan enum di migrasi
+                'email_verified_at' => now(),
+                'remember_token' => Str::random(10),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+                        [
+                'id' => Str::uuid()->toString(),
+                'email' => 'regular3@example.com',
+                'name' => 'Regular3 User',
+                'first_name' => 'Regular3',
                 'last_name' => 'User',
                 'password' => Hash::make('user123'),
                 'image' => 'default.png',

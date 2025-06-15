@@ -18,7 +18,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
-
+use Filament\Tables\Filters\Filter;
 
 class SubModulResource extends Resource
 {
@@ -73,22 +73,46 @@ class SubModulResource extends Resource
                 TextColumn::make('created_at')->label('Dibuat')->dateTime('d M Y'),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('project_id')
-                    ->label('Project')
-                    ->options(fn () =>
-                        \App\Models\GoingProject::whereIn('status', ['Pending', 'On Progress'])
-                            ->pluck('project_name', 'project_id')
-                    )
-                    ->query(function (Builder $query, $state) {
-                        return $query->whereHas('modul', function ($query) use ($state) {
-                            $query->where('project_id', $state);
-                        });
-                    }),
+                Filter::make('project_modul')
+                    ->form([
+                        Select::make('project_id')
+                            ->label('Project')
+                            ->placeholder('Pilih Project')
+                            ->options(
+                                \App\Models\GoingProject::whereIn('status', ['Pending', 'On Progress'])
+                                    ->pluck('project_name', 'project_id')
+                            )
+                            ->reactive()
+                            ->afterStateUpdated(fn (callable $set) => $set('modul_id', null)),
 
-                Tables\Filters\SelectFilter::make('modul_id')
-                    ->label('Modul')
-                    ->options(fn () => \App\Models\ProjectModul::pluck('nama_modul', 'id'))
-                    ->query(fn (Builder $query, $state) => $query->where('modul_id', $state)),
+                        Select::make('modul_id')
+                            ->label('Modul')
+                            ->placeholder('Pilih Modul')
+                            ->options(function (callable $get) {
+                                $projectId = $get('project_id');
+                                if (!$projectId) {
+                                    return [];
+                                }
+
+                                return \App\Models\ProjectModul::where('project_id', $projectId)
+                                    ->pluck('nama_modul', 'id');
+                            }),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        // Jika tidak ada project_id dan modul_id, jangan tampilkan apa pun
+                        if (empty($data['project_id']) && empty($data['modul_id'])) {
+                            $query->whereRaw('1 = 0'); // untuk menghasilkan query kosong
+                            return $query;
+                        }
+
+                        if (!empty($data['modul_id'])) {
+                            $query->where('modul_id', $data['modul_id']);
+                        } elseif (!empty($data['project_id'])) {
+                            $query->whereHas('modul', fn ($q) => $q->where('project_id', $data['project_id']));
+                        }
+
+                        return $query;
+                    }),
             ])
 
 
@@ -96,6 +120,7 @@ class SubModulResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
+
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
