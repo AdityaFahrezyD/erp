@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('deductions', function (Blueprint $table) {
             $table->uuid('deduction_id')->primary();
             $table->uuid('fk_pegawai_id');
-            $table->enum('deduction_type', ['tax', 'insurance', 'penalty'])->default('tax');
+            $table->enum('deduction_type', ['penalty'])->default('penalty');
             $table->decimal('amount', 15, 2);
+            $table->boolean('is_used')->default(false);
             $table->timestamps();
 
             $table->foreign('fk_pegawai_id')->references('pegawai_id')->on('pegawai');

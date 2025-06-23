@@ -26,9 +26,19 @@ class BonusesResource extends Resource
                     ->label('Pegawai')
                     ->options(\App\Models\Pegawai::pluck('nama', 'pegawai_id'))
                     ->required(),
-                Forms\Components\TextInput::make('bonus_type')
+                Forms\Components\Select::make('bonus_type')
                     ->label('Jenis Bonus')
+                    ->options([
+                        'performance' => 'Performa',
+                        'loyalty' => 'Loyalty',
+                    ])
+                    ->reactive()
                     ->required(),
+                Forms\Components\Select::make('fk_project_id')
+                    ->label('Project')
+                    ->options(\App\Models\GoingProject::pluck('project_name', 'project_id'))
+                    ->required()
+                    ->visible(fn (callable $get) => $get('bonus_type') === 'performance'),
                 Forms\Components\TextInput::make('amount')
                     ->label('Jumlah')
                     ->numeric()

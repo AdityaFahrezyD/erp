@@ -20,7 +20,6 @@ class Finance extends Model
         'amount',
         'saldo',
         'status_pembayaran',
-        'approve_status',
         'notes',
         'fk_invoice_id',
         'fk_payroll_id',
@@ -33,7 +32,6 @@ class Finance extends Model
         'amount' => 'decimal:2',
         'saldo' => 'decimal:2',
         'status_pembayaran' => 'integer',
-        'approve_status' => 'integer',
     ];
 
     /**
@@ -44,75 +42,62 @@ class Finance extends Model
     protected static function booted()
     {
         static::creating(function ($finance) {
-            // Get the latest transaction balance regardless of approval status
-            $latestTransaction = self::latest()->first();
+            $latestTransaction = self::where('date', '<', $finance->date)
+                ->where('status_pembayaran', 1)
+                ->orderBy('date', 'desc')
+                ->orderBy('id', 'desc')
+                ->first();
             $currentBalance = $latestTransaction ? $latestTransaction->saldo : 0;
             
-            // Only update the running balance if this record is approved
-            if ($finance->approve_status == 1) {
-                // Calculate new balance for approved transactions
+            if ($finance->status_pembayaran == 1) {
                 $finance->saldo = $currentBalance + $finance->amount;
             } else {
-                // For pending/rejected status, maintain the last balance
                 $finance->saldo = $currentBalance;
             }
         });
 
         static::updating(function ($finance) {
-            // If approve_status changed to approved (1)
-            if ($finance->isDirty('approve_status') && $finance->approve_status == 1) {
-                // Get the latest transaction balance before this one
-                $latestTransaction = self::where('id', '<', $finance->id)
-                    ->latest()
+            if ($finance->isDirty('status_pembayaran') && $finance->status_pembayaran == 1) {
+                $latestTransaction = self::where('date', '<', $finance->date)
+                    ->where('status_pembayaran', 1)
+                    ->orderBy('date', 'desc')
+                    ->orderBy('id', 'desc')
                     ->first();
-                
                 $currentBalance = $latestTransaction ? $latestTransaction->saldo : 0;
-                
-                // Calculate new balance
                 $finance->saldo = $currentBalance + $finance->amount;
             }
             
-            // If amount changed and record is already approved
-            if ($finance->isDirty('amount') && $finance->approve_status == 1) {
-                // Get the latest transaction balance before this one
-                $latestTransaction = self::where('id', '<', $finance->id)
-                    ->latest()
+            if ($finance->isDirty('amount') && $finance->status_pembayaran == 1) {
+                $latestTransaction = self::where('date', '<', $finance->date)
+                    ->where('status_pembayaran', 1)
+                    ->orderBy('date', 'desc')
+                    ->orderBy('id', 'desc')
                     ->first();
-                
                 $currentBalance = $latestTransaction ? $latestTransaction->saldo : 0;
-                
-                // Calculate new balance
                 $finance->saldo = $currentBalance + $finance->amount;
             }
             
-            // If changing from approved to not approved, we need to recalculate all subsequent records
-            if ($finance->isDirty('approve_status') && $finance->getOriginal('approve_status') == 1 && $finance->approve_status != 1) {
-                // This will trigger a post-save operation to recalculate balances
-                // We'll implement this in the saved event
+            if ($finance->isDirty('status_pembayaran') && $finance->getOriginal('status_pembayaran') == 1 && $finance->status_pembayaran != 1) {
                 $finance->saldo = $finance->getOriginal('saldo') - $finance->amount;
             }
         });
         
         // After a record is updated, we may need to recalculate subsequent records
         static::saved(function ($finance) {
-            // Only proceed if approve_status or amount changed
-            if ($finance->wasChanged('approve_status') || $finance->wasChanged('amount')) {
-                // Get all subsequent records
-                $subsequentRecords = self::where('id', '>', $finance->id)
+            if ($finance->wasChanged('status_pembayaran') || $finance->wasChanged('amount')) {
+                $allRecords = self::where('date', '>=', $finance->date)
+                    ->orderBy('date', 'asc')
                     ->orderBy('id', 'asc')
                     ->get();
                 
-                $currentBalance = $finance->saldo;
-                
-                // Update each subsequent record's balance
-                foreach ($subsequentRecords as $record) {
-                    if ($record->approve_status == 1) {
-                        // Only approved records affect the running balance
+                $currentBalance = 0;
+                foreach ($allRecords as $index => $record) {
+                    if ($record->status_pembayaran == 1) {
                         $currentBalance += $record->amount;
                     }
-                    
-                    // Update the record's saldo without triggering events
-                    self::where('id', $record->id)->update(['saldo' => $currentBalance]);
+                    if ($record->id !== $finance->id) { // Hindari update diri sendiri
+                        self::where('id', $record->id)->update(['saldo' => $currentBalance]);
+                    }
                 }
             }
         });
@@ -125,6 +110,7 @@ class Finance extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
     public function invoice()
     {
         return $this->belongsTo(Invoice::class, 'fk_invoice_id');

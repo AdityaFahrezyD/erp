@@ -15,12 +15,11 @@ return new class extends Migration
             $table->uuid('payroll_id')->primary();
             $table->uuid('user_id');
             $table->uuid('fk_pegawai_id');
+            $table->enum('jenis_gaji',['gaji_pokok','thr','tunjangan']);
             $table->decimal('gross_salary', 15, 2); //Gaji kotor untuk periode tersebut.
             $table->decimal('net_salary', 15, 2); //Gaji bersih setelah pemotongan dan bonus.
             $table->string('email_penerima');
             $table->date('tanggal_kirim');
-            $table->boolean('adjustment')->default(false);
-            $table->text('adjustment_desc')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->enum('approve_status', ['pending', 'approved', 'declined'])->default('pending');
             $table->timestamps();

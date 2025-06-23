@@ -37,8 +37,7 @@ class OtherExpenseObserver
                         'date' => $otherExpense->tanggal,
                         'notes' => 'Other Expense: ' . $otherExpense->nama_pengeluaran,
                         'amount' => -$otherExpense->jumlah,
-                        'status_pembayaran' => 1, 
-                        'approve_status' => 1, 
+                        'status_pembayaran' => 1,  
                     ]);
                 }
             }
