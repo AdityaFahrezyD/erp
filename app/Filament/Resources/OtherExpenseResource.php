@@ -37,67 +37,120 @@ class OtherExpenseResource extends Resource
         $isEditMode = $form->getRecord() !== null;
 
         $formSchema = [
-                Hidden::make('expense_id')
-                    ->default(fn() => (string) Str::uuid())
-                    ->dehydrated(true)
-                    ->visibleOn('create'),
+            Hidden::make('expense_id')
+                ->default(fn() => (string) Str::uuid())
+                ->dehydrated(true)
+                ->visibleOn('create'),
 
-                Hidden::make('user_id')
-                    ->default(fn() => Auth::id())
-                    ->dehydrated(true),
+            Hidden::make('user_id')
+                ->default(fn() => Auth::id())
+                ->dehydrated(true),
 
-                Select::make('type_expense')
-                    ->label('Jenis Pengeluaran')
-                    ->required()
-                    ->reactive()
-                    ->options([
-                        'project' => 'Project',
-                        'other' => 'Other',
-                    ]),
+            Select::make('type_expense')
+                ->label('Jenis Pengeluaran')
+                ->required()
+                ->reactive()
+                ->options([
+                    'project' => 'Project',
+                    'other' => 'Other',
+                ])
+                ->afterStateUpdated(function ($state, callable $set) {
+                    if ($state === 'other') {
+                        $set('judul_project', null);
+                        $set('fk_project_id', null);
+                        $set('staff_ids', []);
+                    }
+                }),
 
-                Select::make('judul_project')
-                    ->label('Judul Project')
-                    ->options(function (callable $get) {
-                        $type = $get('type_expense');
-                        if ($type === 'project') {
-                            return \App\Models\GoingProject::pluck('project_name', 'project_id');
+            Select::make('judul_project')
+                ->label('Judul Project')
+                ->options(function (callable $get) {
+                    $type = $get('type_expense');
+                    if ($type === 'project') {
+                        return \App\Models\GoingProject::pluck('project_name', 'project_id');
+                    }
+                    return [];
+                })
+                ->required()
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    $type = $get('type_expense');
+                    if ($type === 'project') {
+                        $set('fk_project_id', $state);
+                        $set('staff_ids', []); // Reset staff_ids saat proyek berubah
+                    } else {
+                        $set('fk_project_id', null);
+                        $set('staff_ids', []);
+                    }
+                })
+                ->hidden(fn (callable $get) => $get('type_expense') !== 'project')
+                ->placeholder('Pilih project'),
+
+            Hidden::make('fk_project_id')->dehydrated(),
+
+            Select::make('nama_pengeluaran')
+                ->label('Nama Pengeluaran')
+                ->required()
+                ->reactive()
+                ->options(function (callable $get) {
+                    $type = $get('type_expense');
+                    if ($type === 'project') {
+                        return [
+                            'transport' => 'Transport',
+                            'accommodation' => 'Accommodation',
+                            'consultant' => 'Consultant',
+                            'printing' => 'Printing',
+                            'equipment' => 'Equipment',
+                            'entertainment' => 'Entertainment',
+                        ];
+                    } elseif ($type === 'other') {
+                        return [
+                            'vacation' => 'Vacation',
+                            'tax' => 'Tax',
+                        ];
+                    }
+                    return [];
+                })
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    $type = $get('type_expense');
+                    if ($type === 'project' && !in_array($state, ['transport', 'accommodation'])) {
+                        $set('staff_ids', []); // Reset staff_ids jika bukan transport/accommodation
+                    }
+                }),
+
+            Select::make('staff_ids')
+                ->label('Staff')
+                ->multiple()
+                ->options(function (callable $get) {
+                    $projectId = $get('fk_project_id');
+                    if ($projectId) {
+                        $project = \App\Models\GoingProject::find($projectId);
+                        if ($project) {
+                            return $project->staff()->pluck('name', 'id');
                         }
-                        return [];
-                    })
-                    ->required()
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                         $type = $get('type_expense');
+                    }
+                    return [];
+                })
+                ->visible(function (callable $get) {
+                    $type = $get('type_expense');
+                    $nama = $get('nama_pengeluaran');
+                    return $type === 'project' && in_array($nama, ['transport', 'accommodation']);
+                }),
 
-                        if ($type === 'project') {
-                            $set('fk_project_id', $state);
-                        } else {
-                            $set('fk_project_id', null);
-                        }
-                    })
-                    ->hidden(fn (callable $get) => $get('type_expense') !== 'project')
-                    ->placeholder('Pilih project'),
-                
-                Hidden::make('fk_project_id')->dehydrated(),
+            TextInput::make('keterangan')
+                ->required()
+                ->label('Keterangan'),
 
-                TextInput::make('nama_pengeluaran')
-                    ->required()
-                    ->label('Nama Pengeluaran'),
-                
-                TextInput::make('keterangan')
-                    ->required()
-                    ->label('Keterangan'),
+            TextInput::make('jumlah')
+                ->label('Amount')
+                ->numeric()
+                ->required(),
 
-                TextInput::make('jumlah')
-                    ->label('Amount')
-                    ->numeric()
-                    ->required(),
-
-                DatePicker::make('tanggal')
-                    ->label('Tanggal Transaksi')
-                    ->required()
-                    ->default(now()),
-            ];
+            DatePicker::make('tanggal')
+                ->label('Tanggal Transaksi')
+                ->required()
+                ->default(now()),
+        ];
 
         if (!$isRestrictedRole) {
             $formSchema[] = Select::make('approve_status')
@@ -109,7 +162,6 @@ class OtherExpenseResource extends Resource
                 ])
                 ->default(0);
         } else {
-            // For finance and staff users, keep approve_status as hidden
             $formSchema[] = Hidden::make('approve_status')
                 ->default(0)
                 ->dehydrated(true);

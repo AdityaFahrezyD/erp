@@ -11,11 +11,11 @@ class InfoWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        // Saldo terakhir
-        $latestSaldo = Finance::orderByDesc('created_at')->value('saldo') ?? 0;
+        // Saldo terakhir berdasarkan date
+        $latestSaldo = Finance::orderByDesc('date')->value('saldo') ?? 0;
 
         // Total piutang (dari proyek yang belum dibayar)
-        $totalPiutang = GoingProject::whereIn('status', ['on progress', 'waiting for payment','pending'])
+        $totalPiutang = GoingProject::whereIn('status', ['on progress', 'waiting for payment', 'pending'])
             ->sum('unpaid_amount') ?? 0;
 
         // Total saldo + piutang

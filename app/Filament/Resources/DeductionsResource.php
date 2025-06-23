@@ -29,8 +29,6 @@ class DeductionsResource extends Resource
                 Forms\Components\Select::make('deduction_type')
                     ->label('Jenis Pemotongan')
                     ->options([
-                        'tax' => 'Pajak',
-                        'insurance' => 'Asuransi',
                         'penalty' => 'Denda',
                     ])
                     ->required(),

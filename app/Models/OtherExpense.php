@@ -16,8 +16,9 @@ class OtherExpense extends Model
         'type_expense',
         'user_id',
         'fk_project_id',
+        'project_staff_id',
         'judul_project',
-        'nama_pengeluaran',
+        'name',
         'keterangan',
         'jumlah',
         'tanggal',
@@ -32,6 +33,10 @@ class OtherExpense extends Model
     public function going_project()
     {
         return $this->belongsTo(GoingProject::class, 'fk_project_id');
+    }
+    public function project_staff()
+    {
+        return $this->belongsTo(ProjectStaff::class, 'project_staff_id');
     }
     public function user()
     {

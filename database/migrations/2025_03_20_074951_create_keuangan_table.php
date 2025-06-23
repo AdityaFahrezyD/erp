@@ -26,7 +26,6 @@ return new class extends Migration
             $table->decimal('saldo', 15, 2); // Ubah dari integer ke decimal untuk nilai uang
             $table->text('notes')->nullable(); // Ubah dari string ke text untuk catatan panjang
             $table->tinyInteger('status_pembayaran')->default(0); // 0=Belum Dibayar, 1=Sudah Dibayar
-            $table->tinyInteger('approve_status')->default(0); // 0=Menunggu, 1=Disetujui, 2=Ditolak
             $table->string('judul_transaksi')->nullable(); // Tambahan judul transaksi
             $table->timestamps();
             $table->softDeletes(); // Tambahkan soft delete jika diperlukan

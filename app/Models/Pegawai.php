@@ -18,10 +18,13 @@ class Pegawai extends Model
     protected $fillable = [
         'pegawai_id',
         'nama',
-        'position',
+        'fk_posisi_id',
         'start_date',
         'phone',
         'email',
+        'status',
+        'tanggungan',
+        'fk_asuransi_id',
         'base_salary',
         'pay_cycle',
     ];
@@ -44,6 +47,16 @@ class Pegawai extends Model
     public function deductions()
     {
         return $this->hasMany(Deductions::class, 'fk_pegawai_id', 'pegawai_id');
+    }
+
+     public function posisi()
+    {
+        return $this->belongsTo(Posisi::class, 'fk_posisi_id');
+    }
+
+    public function asuransi()
+    {
+        return $this->belongsTo(Asuransi::class, 'fk_asuransi_id');
     }
     // Membuat UUID otomatis saat record baru dibuat
     protected static function boot()

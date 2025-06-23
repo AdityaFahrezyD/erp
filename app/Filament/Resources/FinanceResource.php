@@ -351,6 +351,14 @@ class FinanceResource extends Resource
                     Tables\Actions\DeleteBulkAction::make()
                         ->visible(!$isRestrictedRole), // Only admin/owner can use bulk delete
                     Tables\Actions\ExportBulkAction::make()->exporter(FinanceExporter::class),
+                    Tables\Actions\BulkAction::make('approveBulk')
+                        ->label('Confirm status payment')
+                        ->action(fn ($records) => $records->each(fn ($record) =>
+                            $record->update(['status_pembayaran' => 1])
+                        ))
+                        ->requiresConfirmation()
+                        ->color('success')
+                        ->icon('heroicon-m-check'),
                 ]),
             ])
             ->headerActions([

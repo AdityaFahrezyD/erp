@@ -37,7 +37,6 @@ class PayrollObserver
                     'notes' => 'Payroll: ' . $payroll->adjustment_desc,
                     'amount' => -$payroll->net_salary,
                     'status_pembayaran' => 1, // Sudah dibayar
-                    'approve_status' => 1, // Sudah di-approve
                 ]);
             }
         }

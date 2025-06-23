@@ -32,7 +32,6 @@ class InvoiceObserver
                     'notes' => 'Invoice: ' . $invoice->information,
                     'amount' => $invoice->invoice_amount,
                     'status_pembayaran' => 0, // Sudah dibayar
-                    'approve_status' => 0, // Sudah di-approve
                 ]);
             }
         }
@@ -62,8 +61,7 @@ class InvoiceObserver
                     'date' => $invoice->send_date,
                     'notes' => 'Invoice: ' . $invoice->information,
                     'amount' => $invoice->invoice_amount,
-                    'status_pembayaran' => 0, 
-                    'approve_status' => 0, 
+                    'status_pembayaran' => 0,  
                 ]);
             }
         }

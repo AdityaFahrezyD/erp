@@ -43,12 +43,12 @@ return new class extends Migration {
         // Tabel project_staff
         Schema::create('project_staff', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('id_user');
+            $table->uuid('id_pegawai');
             $table->uuid('sub_modul_id');
             $table->enum('status', ['new', 'on progress', 'ready for test', 'done'])->default('new');
             $table->timestamps();
 
-            $table->foreign('id_user')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('id_pegawai')->references('pegawai_id')->on('pegawai')->onDelete('cascade');
             $table->foreign('sub_modul_id')->references('id')->on('sub_modul')->onDelete('cascade');
         });
 
