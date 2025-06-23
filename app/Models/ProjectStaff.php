@@ -25,10 +25,6 @@ class ProjectStaff extends Model
         return $this->belongsTo(Pegawai::class, 'id_pegawai');
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'id');
-    }
 
     public function staff()
     {

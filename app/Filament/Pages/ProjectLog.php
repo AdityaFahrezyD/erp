@@ -64,7 +64,7 @@ class ProjectLog extends Page implements Forms\Contracts\HasForms
 
     protected function getCardsByStatus(string $status): Collection
     {
-        return ProjectStaff::with(['user', 'staff.modul']) 
+        return ProjectStaff::with(['pegawai', 'staff.modul']) // pakai relasi pegawai, bukan user
             ->where('status', $status)
             ->whereHas('staff', function ($query) {
                 $query->where('modul_id', $this->selectedModulId);
@@ -75,11 +75,12 @@ class ProjectLog extends Page implements Forms\Contracts\HasForms
                     'id' => $item->id,
                     'modul' => $item->staff->modul->nama_modul ?? '-', 
                     'sub_modul' => $item->staff->nama_sub_modul ?? '-',
-                    'staff' => $item->user->name ?? '-',
+                    'staff' => $item->pegawai->nama ?? '-', // pakai relasi pegawai
                     'status' => $item->status,
                 ];
             });
     }
+
 
 
     public function updateCardStatus(string $cardId, string $newStatus): void

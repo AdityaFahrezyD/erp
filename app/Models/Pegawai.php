@@ -16,7 +16,6 @@ class Pegawai extends Model
     public $incrementing = false;
 
     protected $fillable = [
-        'pegawai_id',
         'nama',
         'fk_posisi_id',
         'start_date',
@@ -57,6 +56,16 @@ class Pegawai extends Model
     public function asuransi()
     {
         return $this->belongsTo(Asuransi::class, 'fk_asuransi_id');
+    }
+
+        public function pegawai()
+    {
+        return $this->hasMany(ProjectStaff::class, 'id_pegawai');
+    }
+
+        public function leader()
+    {
+        return $this->hasMany(Pegawai::class, 'project_leader');
     }
     // Membuat UUID otomatis saat record baru dibuat
     protected static function boot()

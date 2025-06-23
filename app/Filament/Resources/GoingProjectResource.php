@@ -16,7 +16,7 @@ use App\Filament\Resources\GoingProjectResource\RelationManagers;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\ModulesRelationManager;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\StaffRelationManager;
-use App\Models\User;
+use App\Models\Pegawai;
 
 
 class GoingProjectResource extends Resource
@@ -57,9 +57,12 @@ class GoingProjectResource extends Resource
             Forms\Components\Select::make('project_leader')
                 ->label('Project Leader')
                 ->options(function () {
-                    return User::where('role', 'staff')
-                        ->get()
-                        ->mapWithKeys(fn ($user) => [$user->id => $user->name]);
+                    return Pegawai::whereHas('posisi', function ($query) {
+                        $query->where('posisi', 'Staff IT');
+                    })
+                    ->get()
+                    ->mapWithKeys(fn ($pegawai) => [$pegawai->pegawai_id => $pegawai->nama]);
+
                 })
                 ->searchable()
                 ->preload()

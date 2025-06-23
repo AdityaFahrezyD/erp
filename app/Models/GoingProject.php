@@ -55,6 +55,6 @@ class GoingProject extends Model
 
     public function leader()
     {
-        return $this->belongsTo(User::class, 'project_leader');
+        return $this->belongsTo(Pegawai::class, 'project_leader');
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\SubModulResource\RelationManagers;
 
-use App\Models\User;
+use App\Models\Pegawai;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Select;
@@ -22,20 +22,22 @@ class StaffRelationManager extends RelationManager
     public function form(Form $form): Form
     {
         return $form->schema([
-            Select::make('id_user')
+            Select::make('id_pegawai')
                 ->label('Staff')
                 ->options(function (RelationManager $livewire) {
                     $subModul = $livewire->getOwnerRecord();
-                    $assignedStaffIds = $subModul->staff()->pluck('id_user')->toArray();
+                    $assignedStaffIds = $subModul->staff()->pluck('id_pegawai')->toArray();
 
-                    return User::where('role', 'staff')
-                        ->whereNotIn('id', $assignedStaffIds)
+                    return Pegawai::whereHas('posisi', function ($query) {
+                            $query->where('posisi', 'Staff IT'); // posisi = 'Staff IT'
+                        })
+                        ->whereNotIn('pegawai_id', $assignedStaffIds)
                         ->get()
-                        ->mapWithKeys(fn ($user) => [$user->id => $user->name]);
+                        ->mapWithKeys(fn ($pegawai) => [$pegawai->pegawai_id => $pegawai->nama]);
                 })
                 ->searchable()
-                ->reactive()
                 ->required(),
+
 
             Select::make('status')
                 ->label('Status Pengerjaan')
@@ -53,9 +55,9 @@ class StaffRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('id_user')
+            ->recordTitleAttribute('id_pegawai')
             ->columns([
-                TextColumn::make('user.name')->label('Staff'),
+                TextColumn::make('pegawai.nama')->label('Staff'),
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('created_at')->label('Ditambahkan')->dateTime('d M Y'),
             ])

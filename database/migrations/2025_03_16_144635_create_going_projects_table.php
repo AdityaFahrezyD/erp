@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->uuid('project_leader');
             $table->timestamps();
 
-            $table->foreign('project_leader')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('project_leader')->references('pegawai_id')->on('pegawai')->onDelete('cascade');
         });
 
         // Tabel project_modul
