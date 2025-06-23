@@ -368,6 +368,10 @@ class FinanceResource extends Resource
             //
         ];
     }
+    // public static function getNavigationBadge(): ?string
+    // {
+    //     return (string) Finance::whereIn('status', ['Pending', 'On Progress', 'Waiting for Payment'])->count();
+    // }
 
     public static function getPages(): array
     {

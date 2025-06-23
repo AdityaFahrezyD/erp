@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('email_penerima');
             $table->date('tanggal_kirim');
             $table->boolean('adjustment')->default(false);
-            $table->text('adjustment_desc');
+            $table->text('adjustment_desc')->nullable();
             $table->timestamp('sent_at')->nullable();
             $table->enum('approve_status', ['pending', 'approved', 'declined'])->default('pending');
             $table->timestamps();

@@ -84,7 +84,6 @@ class PayrollResource extends Resource
                 ->required(),
             Forms\Components\TextInput::make('adjustment_desc')
                 ->label('Deskripsi Penyesuaian Gaji')
-                ->required()
                 ->reactive()
                 ->default('-')
                 ->visible(fn ($get) => $get('adjustment')),

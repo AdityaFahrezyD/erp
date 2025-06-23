@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-Schema::create('finances', function (Blueprint $table) {
+        Schema::create('finances', function (Blueprint $table) {
             $table->id(); // Bigint auto-increment primary key
             $table->uuid('finance_id')->unique();
             $table->string('transaction_id')->unique();

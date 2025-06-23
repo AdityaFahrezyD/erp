@@ -30,6 +30,11 @@ class GoingProject extends Model
         'project_leader',
     ];
 
+    protected $casts = [
+        'batas_awal' => 'date',
+        'batas_akhir' => 'date',
+    ];
+
     public function modules()
     {
         return $this->hasMany(ProjectModul::class, 'project_id', 'project_id');

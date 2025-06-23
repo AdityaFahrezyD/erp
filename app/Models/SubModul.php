@@ -13,6 +13,8 @@ class SubModul extends Model
     protected $table = 'sub_modul';
     protected $fillable = [
         'modul_id',
+        'batas_awal',
+        'batas_akhir',
         'nama_sub_modul',
         'deskripsi_sub_modul',
     ];

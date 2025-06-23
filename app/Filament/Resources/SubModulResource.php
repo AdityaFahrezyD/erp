@@ -56,6 +56,43 @@ class SubModulResource extends Resource
                 ->label('Nama Sub Modul')
                 ->required(),
 
+            Forms\Components\DatePicker::make('batas_awal')
+                ->label('Batas Awal')
+                ->required()
+                ->rules(function (callable $get) {
+                    $projectId = $get('project_id');
+                    if (!$projectId) {
+                        return [];
+                    }
+
+                    $project = \App\Models\GoingProject::find($projectId);
+
+                    if (!$project) {
+                        return [];
+                    }
+
+                    return [
+                        'date',
+                        'after_or_equal:' . $project->batas_awal,
+                    ];
+                }),
+
+                    
+            Forms\Components\DatePicker::make('batas_akhir')
+                ->label('Batas Akhir')
+                ->required()
+                ->rules(function (callable $get) {
+                    $batasAwal = $get('batas_awal');
+                    if (!$batasAwal) {
+                        return [];
+                    }
+
+                    return [
+                        'date',
+                        'after_or_equal:' . $batasAwal,
+                    ];
+                }),           
+
             Textarea::make('deskripsi_sub_modul')
                 ->label('Deskripsi Sub Modul')
                 ->nullable(),
@@ -72,6 +109,7 @@ class SubModulResource extends Resource
                 TextColumn::make('deskripsi_sub_modul')->label('Deskripsi')->wrap(),
                 TextColumn::make('created_at')->label('Dibuat')->dateTime('d M Y'),
             ])
+
             ->filters([
                 Filter::make('project_modul')
                     ->form([
@@ -114,7 +152,18 @@ class SubModulResource extends Resource
                         return $query;
                     }),
             ])
+            ->emptyStateHeading('Data Kosong')
+            ->emptyStateDescription(function () {
+                // Ambil data filter dari query string (karena tidak bisa akses langsung seperti closure)
+                $projectId = request()->input('tableFilters.project_modul.project_id');
+                $modulId = request()->input('tableFilters.project_modul.modul_id');
 
+                if (empty($projectId) && empty($modulId)) {
+                    return 'Belum ada sub modul untuk project/modul ini.';
+                }
+
+                return 'Silakan filter project dan modul terlebih dahulu.';
+            })
 
 
             ->actions([

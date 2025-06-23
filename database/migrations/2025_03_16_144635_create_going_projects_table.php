@@ -42,6 +42,8 @@ return new class extends Migration {
             Schema::create('sub_modul', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('modul_id');
+            $table->date('batas_awal')->nullable();
+            $table->date('batas_akhir')->nullable();
             $table->string('nama_sub_modul', 50);
             $table->string('deskripsi_sub_modul', 200) ->nullable();
             $table->timestamps();

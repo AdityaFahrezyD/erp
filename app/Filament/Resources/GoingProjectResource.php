@@ -27,6 +27,8 @@ class GoingProjectResource extends Resource
 
     protected static ?string $navigationGroup = 'Project';
 
+    protected static ?string $navigationLabel = 'Project';
+
     public static function form(Form $form): Form
     {
         return $form
