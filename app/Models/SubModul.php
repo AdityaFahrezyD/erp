@@ -21,6 +21,13 @@ class SubModul extends Model
     protected $keyType = 'string';
 
 
+    public function pegawai()
+    {
+        return $this->belongsToMany(Pegawai::class, 'project_staff', 'sub_modul_id', 'id_pegawai')
+                    ->withPivot('status')
+                    ->withTimestamps();
+    }
+
     public function sub_modul()
     {
         return $this->belongsTo(ProjectModul::class, 'modul_id');

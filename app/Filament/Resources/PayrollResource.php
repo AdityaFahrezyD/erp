@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 class PayrollResource extends Resource
 {
@@ -31,48 +32,72 @@ class PayrollResource extends Resource
                 ->options(Pegawai::pluck('nama', 'pegawai_id'))
                 ->required()
                 ->reactive()
-                ->afterStateUpdated(function ($state, callable $set) {
-                    // Ambil data pegawai berdasarkan fk_pegawai_id
-                    $pegawai = Pegawai::find($state);
-                    if ($pegawai) {
-                        // Set gross_salary dari base_salary pegawai
-                        $gross_salary = $pegawai->base_salary;
-                        $set('gross_salary', $gross_salary);
+                ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                    $jenis_gaji = $get('jenis_gaji');
+                    if ($state && $jenis_gaji) {
+                        $pegawai = Pegawai::with(['posisi', 'asuransi'])->find($state);
+                        if ($pegawai) {
+                            // Buat instance sementara Payroll untuk menghitung
+                            $payroll = new Payroll([
+                                'fk_pegawai_id' => $state,
+                                'jenis_gaji' => $jenis_gaji,
+                            ]);
+                            $payroll->pegawai = $pegawai; // Set relasi pegawai
+                            $payroll->calculateSalary();
 
-                        // Set email_penerima dari email pegawai
-                        $set('email_penerima', $pegawai->email);
-
-                        // Hitung net_salary berdasarkan bonuses dan deductions
-                        $total_bonuses = Bonuses::where('fk_pegawai_id', $state)->sum('amount') ?? 0;
-                        $total_deductions = Deductions::where('fk_pegawai_id', $state)->sum('amount') ?? 0;
-                        $net_salary = $gross_salary + $total_bonuses - $total_deductions;
-                        $set('net_salary', $net_salary);
+                            // Set nilai ke form
+                            $set('email_penerima', $pegawai->email);
+                            $set('gross_salary', $payroll->gross_salary);
+                            $set('net_salary', $payroll->net_salary);
+                        }
                     }
                 }),
+
+
+            Forms\Components\Select::make('jenis_gaji')
+                ->label('Jenis Gaji')
+                ->options([
+                    'gaji_pokok' => 'Gaji Pokok',
+                    'thr' => 'THR',
+                    'tunjangan' => 'Tunjangan',
+                ])
+                ->required()
+                ->reactive()
+                ->afterStateUpdated(function ($state, callable $get, callable $set) {
+                    $fk_pegawai_id = $get('fk_pegawai_id');
+                    if ($fk_pegawai_id && $state) {
+                        $pegawai = Pegawai::with(['posisi', 'asuransi'])->find($fk_pegawai_id);
+                        if ($pegawai) {
+                            // Buat instance sementara Payroll untuk menghitung
+                            $payroll = new Payroll([
+                                'fk_pegawai_id' => $fk_pegawai_id,
+                                'jenis_gaji' => $state,
+                            ]);
+                            $payroll->pegawai = $pegawai; // Set relasi pegawai
+                            $payroll->calculateSalary();
+
+                            // Set nilai ke form
+                            $set('email_penerima', $pegawai->email);
+                            $set('gross_salary', $payroll->gross_salary);
+                            $set('net_salary', $payroll->net_salary);
+                        }
+                    }
+                }),    
+
             Forms\Components\TextInput::make('gross_salary')
                 ->label('Gaji Kotor')
                 ->numeric()
                 ->required()
-                ->reactive()
-                ->afterStateUpdated(function ($state, callable $get, callable $set) {
-                    // Hitung net_salary berdasarkan gross_salary, bonuses, dan deductions
-                    $fk_pegawai_id = $get('fk_pegawai_id');
-                    $gross_salary = $state ?? 0;
+                ->disabled()
+                ->dehydrated(true),
 
-                    // Ambil total bonuses dan deductions berdasarkan fk_pegawai_id
-                    $total_bonuses = Bonuses::where('fk_pegawai_id', $fk_pegawai_id)->sum('amount') ?? 0;
-                    $total_deductions = Deductions::where('fk_pegawai_id', $fk_pegawai_id)->sum('amount') ?? 0;
-
-                    // Hitung net_salary
-                    $net_salary = $gross_salary + $total_bonuses - $total_deductions;
-                    $set('net_salary', $net_salary);
-                }),
             Forms\Components\TextInput::make('net_salary')
                 ->label('Gaji Bersih')
                 ->numeric()
                 ->required()
                 ->disabled()
                 ->dehydrated(true),
+
             Forms\Components\TextInput::make('email_penerima')
                 ->label('Email Penerima')
                 ->email()
@@ -82,12 +107,6 @@ class PayrollResource extends Resource
             Forms\Components\DatePicker::make('tanggal_kirim')
                 ->label('Tanggal Kirim')
                 ->required(),
-            Forms\Components\TextInput::make('adjustment_desc')
-                ->label('Deskripsi Penyesuaian Gaji')
-                ->required()
-                ->reactive()
-                ->default('-')
-                ->visible(fn ($get) => $get('adjustment')),
             Forms\Components\Select::make('approve_status')
                 ->label('Status Persetujuan')
                 ->options([
@@ -97,10 +116,6 @@ class PayrollResource extends Resource
                 ])
                 ->default('pending')
                 ->required(),
-            Forms\Components\Checkbox::make('adjustment')
-                ->label('Penyesuaian Gaji')
-                ->reactive()
-                ->default(false),
         ]);
     }
 
@@ -112,6 +127,22 @@ class PayrollResource extends Resource
                 Tables\Columns\TextColumn::make('pegawai.nama')
                     ->label('Pegawai')
                     ->searchable(),
+                Tables\Columns\BadgeColumn::make('jenis_gaji')
+                    ->label('Jenis Gaji')
+                    ->color(fn (string $state): string => match ($state) {
+                        'gaji_pokok' => 'success',
+                        'thr' => 'warning',
+                        'tunjangan' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(function (string $state): string {
+                        return match ($state) {
+                            'gaji_pokok' => 'Gaji Pokok',
+                            'thr' => 'THR',
+                            'tunjangan' => 'Tunjangan',
+                            default => ucfirst($state),
+                        };
+                    }),
                 Tables\Columns\TextColumn::make('gross_salary')
                     ->label('Gaji Kotor')
                     ->money('IDR'),
@@ -167,7 +198,10 @@ class PayrollResource extends Resource
                         return $query->when($data['email'], fn ($query) => $query->where('email_penerima', 'like', "%{$data['email']}%"));
                     }),
             ])
-            ->actions([Tables\Actions\EditAction::make()])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+                ])
             ->headerActions([
                 Tables\Actions\Action::make('export_all_pdf')
                     ->label('Download PDF')
@@ -208,6 +242,7 @@ class PayrollResource extends Resource
         return [
             'index' => Pages\ListPayrolls::route('/'),
             'create' => Pages\CreatePayroll::route('/create'),
+            'view' => Pages\ViewPayroll::route('/{record}'),
             'edit' => Pages\EditPayroll::route('/{record}/edit'),
         ];
     }

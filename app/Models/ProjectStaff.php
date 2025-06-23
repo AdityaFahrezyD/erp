@@ -15,14 +15,19 @@ class ProjectStaff extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id_user',
+        'id_pegawai',
         'sub_modul_id',
         'status',
     ];
 
+    public function pegawai()
+    {
+        return $this->belongsTo(Pegawai::class, 'id_pegawai');
+    }
+
     public function user()
     {
-        return $this->belongsTo(User::class, 'id_user');
+        return $this->belongsTo(User::class, 'id');
     }
 
     public function staff()

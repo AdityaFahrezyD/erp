@@ -16,7 +16,9 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->enum('type_expense', ['project', 'other']);
             $table->uuid('fk_project_id')->nullable();
+            $table->enum('name',['transport', 'accommodation', 'consultant', 'printing', 'equipment', 'entertainment','vacation','tax']);
             $table->string('judul_project')->nullable();
+            $table->uuid('project_staff_id')->nullable();
             $table->string('nama_pengeluaran');
             $table->string('keterangan');
             $table->decimal('jumlah', 15, 2);
@@ -25,6 +27,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('fk_project_id')->references('project_id')->on('going_projects')->nullOnDelete();
+            $table->foreign('project_staff_id')->references('id')->on('project_staff')->nullOnDelete();
         });
     }
 

@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PegawaiResource\Pages;
 use App\Filament\Resources\PegawaiResource\RelationManagers;
 use App\Models\Pegawai;
+use App\Models\Posisi;
+use App\Models\Asuransi;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -31,44 +33,84 @@ class PegawaiResource extends Resource
     {
         return $form
             ->schema([
-                Hidden::make('pegawai_id')
-                    ->default(fn() => (string) Str::uuid())
-                    ->dehydrated(true)
-                    ->visibleOn('create'),
+                // ID Pegawai (hanya saat create)
+            Hidden::make('pegawai_id')
+                ->default(fn () => (string) Str::uuid())
+                ->dehydrated(true)
+                ->visibleOn('create'),
 
-                TextInput::make('nama')
-                    ->required()
-                    ->label('Nama Pegawai'),
+            // Nama Pegawai
+            TextInput::make('nama')
+                ->label('Nama Pegawai')
+                ->required(),
 
-                TextInput::make('position')
-                    ->required()
-                    ->label('Posisi'),
+            // Posisi (Dropdown berdasarkan fk_posisi_id)
+            Select::make('fk_posisi_id')
+                ->relationship('posisi', 'posisi')
+                ->label('Posisi')
+                ->required()
+                ->reactive()
+                ->afterStateUpdated(function ($state, $set) {
+                    if ($state) {
+                        $posisi = Posisi::find($state);
+                        if ($posisi) {
+                            $set('base_salary', $posisi->gaji); // Asumsi kolom gaji di Posisi adalah 'salary'
+                        }
+                    }
+                }),
 
-                DatePicker::make('start_date')
-                    ->label('Tanggal Masuk')
-                    ->required()
-                    ->default(now()),
+            // Tanggal Masuk
+            DatePicker::make('start_date')
+                ->label('Tanggal Masuk')
+                ->required()
+                ->default(now()),
 
-                TextInput::make('phone')
-                    ->label('Nomor HP')    
-                    ->required(),
+            // Nomor HP
+            TextInput::make('phone')
+                ->label('Nomor HP')
+                ->required(),
 
-                TextInput::make('email')
-                    ->label('Email')    
-                    ->required(),
-                
-                TextInput::make('base_salary')
-                    ->label('Gaji Dasar')
-                    ->numeric()
-                    ->required(),
+            // Email
+            TextInput::make('email')
+                ->label('Email')
+                ->required(),
 
-                Select::make('pay_cycle')
-                    ->label('Waktu Penggajian')
-                    ->required()
-                    ->options([
-                        'monthly' => 'Setiap Bulan',
-                        'weekly' => 'Setiap Minggu',
-                    ]),
+            // Status Pernikahan
+            Select::make('status')
+                ->options([
+                    'single' => 'Single',
+                    'married' => 'Married',
+                ])
+                ->label('Status Pernikahan')
+                ->required(),
+
+            // Jumlah Tanggungan
+            TextInput::make('tanggungan')
+                ->numeric()
+                ->minValue(0)
+                ->label('Jumlah Tanggungan')
+                ->required(),
+
+            // Asuransi (Dropdown berdasarkan fk_asuransi_id)
+            Select::make('fk_asuransi_id')
+                ->relationship('asuransi', 'tingkat')
+                ->label('Asuransi')
+                ->required(),
+
+            // Gaji Dasar
+            TextInput::make('base_salary')
+                ->label('Gaji Dasar')
+                ->numeric()
+                ->required(),
+
+            // Waktu Penggajian
+            Select::make('pay_cycle')
+                ->label('Waktu Penggajian')
+                ->required()
+                ->options([
+                    'monthly' => 'Setiap Bulan',
+                    'weekly' => 'Setiap Minggu',
+                ]),
             ]);
     }
 
@@ -83,7 +125,7 @@ class PegawaiResource extends Resource
                     ->sortable()
                     ->label('Nama Pegawai'),
 
-                TextColumn::make('position')
+                TextColumn::make('posisi.posisi')
                     ->searchable()
                     ->sortable()
                     ->label('Posisi'),
@@ -104,10 +146,36 @@ class PegawaiResource extends Resource
                     ->sortable()
                     ->label('Email'),
 
+                TextColumn::make('status')
+                    ->label('Status Pernikahan')
+                    ->badge()
+                    ->searchable()
+                    ->sortable()
+                    ->color(fn ($state): string => match ($state) {
+                        'single' => 'info',
+                        'married' => 'success',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'single' => 'Single',
+                        'married' => 'Married',
+                        default => 'Unknown',
+                    }),
+
+                TextColumn::make('tanggungan')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Jumlah Tanggungan'),
+
                 TextColumn::make('base_salary')
                     ->label('Gaji Dasar')  
                     ->money('IDR', locale: 'id')
                     ->sortable(),
+
+                TextColumn::make('asuransi.nama')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Asuransi'),
 
                 TextColumn::make('pay_cycle')
                     ->label('Waktu Penggajian')
@@ -131,6 +199,13 @@ class PegawaiResource extends Resource
                     ->options([
                         'monthly' => 'Setiap Bulan',
                         'weekly' => 'Setiap Minggu',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status Pernikahan')
+                    ->options([
+                        'single' => 'Single',
+                        'married' => 'Married',
                     ]),
 
                 Tables\Filters\Filter::make('start_date')
