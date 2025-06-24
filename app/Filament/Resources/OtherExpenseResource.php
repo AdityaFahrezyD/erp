@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OtherExpenseResource\Pages;
 use App\Filament\Resources\OtherExpenseResource\RelationManagers;
 use App\Models\OtherExpense;
+use App\Models\GoingProject;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Components\Hidden;
@@ -58,7 +59,7 @@ class OtherExpenseResource extends Resource
                     if ($state === 'other') {
                         $set('judul_project', null);
                         $set('fk_project_id', null);
-                        $set('staff_ids', []);
+                        $set('project_staff_id', []);
                     }
                 }),
 
@@ -77,10 +78,10 @@ class OtherExpenseResource extends Resource
                     $type = $get('type_expense');
                     if ($type === 'project') {
                         $set('fk_project_id', $state);
-                        $set('staff_ids', []); // Reset staff_ids saat proyek berubah
+                        $set('project_staff_id', []); // Reset staff_ids saat proyek berubah
                     } else {
                         $set('fk_project_id', null);
-                        $set('staff_ids', []);
+                        $set('project_staff_id', []);
                     }
                 })
                 ->hidden(fn (callable $get) => $get('type_expense') !== 'project')
@@ -114,28 +115,46 @@ class OtherExpenseResource extends Resource
                 ->afterStateUpdated(function ($state, callable $set, callable $get) {
                     $type = $get('type_expense');
                     if ($type === 'project' && !in_array($state, ['transport', 'accommodation'])) {
-                        $set('staff_ids', []); // Reset staff_ids jika bukan transport/accommodation
+                        $set('project_staff_id', []); // Reset staff_ids jika bukan transport/accommodation
                     }
                 }),
 
-            Select::make('staff_ids')
-                ->label('Staff')
-                ->multiple()
+            Select::make('project_staff_id')
+                ->label('Nama Pegawai')
+                ->multiple() // Memungkinkan pemilihan lebih dari satu pegawai
                 ->options(function (callable $get) {
+                    // Ambil project_id dari form
                     $projectId = $get('fk_project_id');
+                    
                     if ($projectId) {
-                        $project = \App\Models\GoingProject::find($projectId);
+                        // Query GoingProject dengan eager loading relasi
+                        $project = GoingProject::with(['modules.sub_modul.pegawai'])
+                            ->find($projectId);
+                        
                         if ($project) {
-                            return $project->staff()->pluck('name', 'id');
+                            $pegawai = collect();
+                            
+                            // Kumpulkan semua pegawai dari sub modul
+                            foreach ($project->modules as $module) {
+                                foreach ($module->sub_modul as $subModul) {
+                                    $pegawai = $pegawai->merge($subModul->pegawai);
+                                }
+                            }
+                            
+                            // Kembalikan daftar unik pegawai dengan id dan nama
+                            return $pegawai->pluck('nama', 'pegawai_id')->unique()->all();
                         }
                     }
-                    return [];
+                    
+                    return []; // Kembalikan array kosong jika proyek tidak ditemukan
                 })
                 ->visible(function (callable $get) {
+                    // Tampilkan field hanya jika type_expense adalah 'transport' atau 'accommodation'
                     $type = $get('type_expense');
                     $nama = $get('nama_pengeluaran');
                     return $type === 'project' && in_array($nama, ['transport', 'accommodation']);
-                }),
+                })
+                ->required(),
 
             TextInput::make('keterangan')
                 ->required()

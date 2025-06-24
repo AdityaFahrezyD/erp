@@ -80,7 +80,7 @@ class PegawaiResource extends Resource
             Select::make('status')
                 ->options([
                     'single' => 'Single',
-                    'married' => 'Married',
+                    'maried' => 'Married',
                 ])
                 ->label('Status Pernikahan')
                 ->required(),
@@ -154,12 +154,12 @@ class PegawaiResource extends Resource
                     ->sortable()
                     ->color(fn ($state): string => match ($state) {
                         'single' => 'info',
-                        'married' => 'success',
+                        'maried' => 'success',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn ($state) => match ($state) {
                         'single' => 'Single',
-                        'married' => 'Married',
+                        'maried' => 'Married',
                         default => 'Unknown',
                     }),
 
@@ -206,7 +206,7 @@ class PegawaiResource extends Resource
                     ->label('Status Pernikahan')
                     ->options([
                         'single' => 'Single',
-                        'married' => 'Married',
+                        'maried' => 'Married',
                     ]),
 
                 Tables\Filters\Filter::make('start_date')
