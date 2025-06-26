@@ -77,6 +77,7 @@ class ProjectLog extends Page implements Forms\Contracts\HasForms
                     'sub_modul' => $item->staff->nama_sub_modul ?? '-',
                     'staff' => $item->pegawai->nama ?? '-', // pakai relasi pegawai
                     'status' => $item->status,
+                    'is_critical_path' => $item->staff->is_critical_path ?? false, // ← tambahkan ini
                 ];
             });
     }

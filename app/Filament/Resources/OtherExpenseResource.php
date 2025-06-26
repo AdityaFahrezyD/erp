@@ -63,7 +63,7 @@ class OtherExpenseResource extends Resource
                 }),
 
             Select::make('judul_project')
-                ->label('Judul Project')
+                ->label('Nama Project')
                 ->options(function (callable $get) {
                     $type = $get('type_expense');
                     if ($type === 'project') {
@@ -118,24 +118,40 @@ class OtherExpenseResource extends Resource
                     }
                 }),
 
-            Select::make('staff_ids')
-                ->label('Staff')
-                ->multiple()
-                ->options(function (callable $get) {
-                    $projectId = $get('fk_project_id');
-                    if ($projectId) {
-                        $project = \App\Models\GoingProject::find($projectId);
-                        if ($project) {
-                            return $project->staff()->pluck('name', 'id');
-                        }
-                    }
-                    return [];
-                })
-                ->visible(function (callable $get) {
-                    $type = $get('type_expense');
-                    $nama = $get('nama_pengeluaran');
-                    return $type === 'project' && in_array($nama, ['transport', 'accommodation']);
-                }),
+            Select::make('project_staff_id')
+            ->label('Staff')
+            ->multiple()
+            ->options(function (callable $get) {
+                $projectId = $get('fk_project_id');
+                if ($projectId) {
+                    // Ambil project_staff dari project_id via submodul
+                    $staff = \App\Models\ProjectStaff::with('pegawai')
+                        ->whereIn('sub_modul_id', function ($query) use ($projectId) {
+                            $query->select('id')
+                                ->from('sub_modul')
+                                ->whereIn('modul_id', function ($q) use ($projectId) {
+                                    $q->select('id')
+                                        ->from('project_modul')
+                                        ->where('project_id', $projectId);
+                                });
+                        })
+                        ->get();
+
+                    return $staff
+                        ->unique('id_pegawai') // Hindari duplikat berdasarkan pegawai
+                        ->mapWithKeys(function ($item) {
+                            return [$item->id_pegawai => $item->pegawai->nama];
+                        });
+
+                }
+                return [];
+            })
+            ->visible(function (callable $get) {
+                $type = $get('type_expense');
+                $nama = $get('nama_pengeluaran');
+                return $type === 'project' && in_array($nama, ['transport', 'accommodation']);
+            }),
+
 
             TextInput::make('keterangan')
                 ->required()

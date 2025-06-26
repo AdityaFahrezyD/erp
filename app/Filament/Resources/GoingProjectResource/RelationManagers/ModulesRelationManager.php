@@ -51,6 +51,16 @@ class ModulesRelationManager extends RelationManager
                 TextColumn::make('alokasi_dana')->money('IDR'),
                 TextColumn::make('unpaid_amount')->money('IDR')->label('Sisa Tagihan'),
                 TextColumn::make('created_at')->dateTime(),
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state) => match ($state) {
+                        'done' => 'success',
+                        'on progress' => 'primary',
+                        'new' => 'gray',
+                        default => 'gray',
+                    }),
+
             ])
             ->filters([])
             ->actions([

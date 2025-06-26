@@ -113,7 +113,7 @@ class GoingProjectResource extends Resource
                 Tables\Columns\TextColumn::make('harga_awal')->money('IDR'),
                 Tables\Columns\TextColumn::make('total_harga_proyek')->money('IDR'),
                 Tables\Columns\TextColumn::make('unpaid_amount')->money('IDR'),
-                Tables\Columns\TextColumn::make('leader.name')
+                Tables\Columns\TextColumn::make('leader.nama')
                     ->label('Project Leader')
                     ->searchable()
                     ->sortable(),
