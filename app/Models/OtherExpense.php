@@ -28,6 +28,7 @@ class OtherExpense extends Model
         'tanggal' => 'date',
         'jumlah' => 'decimal:2',
         'approve_status' => 'string',
+        'project_staff_id' => 'array',
     ];
 
     public function going_project()

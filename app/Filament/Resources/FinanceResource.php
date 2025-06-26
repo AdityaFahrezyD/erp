@@ -151,22 +151,7 @@ class FinanceResource extends Resource
                 ->rows(3),
         ];
 
-        // Add approve_status field only for admin/owner (not finance or staff)
-        // if (!$isRestrictedRole) {
-        //     $formSchema[] = Select::make('approve_status')
-        //         ->label('Status Persetujuan')
-        //         ->options([
-        //             0 => 'Menunggu Persetujuan',
-        //             1 => 'Disetujui',
-        //             2 => 'Ditolak',
-        //         ])
-        //         ->default(0);
-        // } else {
-        //     // For finance and staff users, keep approve_status as hidden
-        //     $formSchema[] = Hidden::make('approve_status')
-        //         ->default(0)
-        //         ->dehydrated(true);
-        // }
+        
 
         return $form->schema($formSchema);
     }
@@ -251,23 +236,6 @@ class FinanceResource extends Resource
                     })
                     ->formatStateUsing(fn ($state) => $state ? 'Lunas' : 'Belum Lunas'),
 
-                // TextColumn::make('approve_status')
-                //     ->label('Status Persetujuan')
-                //     ->badge()
-                //     ->searchable()
-                //     ->sortable()
-                //     ->color(fn (int $state): string => match ($state) {
-                //         0 => 'gray',
-                //         1 => 'primary',
-                //         2 => 'danger',
-                //         default => 'gray',
-                //     })
-                //     ->formatStateUsing(fn ($state) => match ($state) {
-                //         0 => 'Menunggu Persetujuan',
-                //         1 => 'Disetujui',
-                //         2 => 'Ditolak',
-                //         default => 'Menunggu Persetujuan',
-                //     }),
                 TextColumn::make('user.name')
                     ->label('User')
                     ->searchable()
