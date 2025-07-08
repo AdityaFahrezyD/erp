@@ -18,7 +18,8 @@ use App\Filament\Resources\GoingProjectResource\RelationManagers\PaymentsRelatio
 use App\Filament\Resources\GoingProjectResource\RelationManagers\StaffRelationManager;
 use App\Models\Pegawai;
 use Illuminate\Support\Facades\Auth;
-
+use App\Helpers\ProjectAccessHelper;
+use Illuminate\Database\Eloquent\Model;
 
 class GoingProjectResource extends Resource
 {
@@ -29,6 +30,22 @@ class GoingProjectResource extends Resource
     protected static ?string $navigationGroup = 'Project';
 
     protected static ?string $navigationLabel = 'Project';
+
+
+    public static function canCreate(): bool
+    {
+        return ProjectAccessHelper::isAdmin();
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return ProjectAccessHelper::isAdmin() || ProjectAccessHelper::isProjectLeader($record);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return ProjectAccessHelper::isAdmin();
+    }
 
     public static function form(Form $form): Form
     {
@@ -172,12 +189,12 @@ class GoingProjectResource extends Resource
     public static function canViewAny(): bool
     {
         $user = Auth::user();
-        return $user && in_array($user->role, ['admin', 'owner']);
+        return $user && in_array($user->role, ['admin', 'owner', 'staff', 'finance']);
     }
 
     public static function shouldRegisterNavigation(): bool
     {
         $user = Auth::user();
-        return $user && in_array($user->role, ['admin', 'owner']);
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
     }
 }

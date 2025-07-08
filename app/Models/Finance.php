@@ -77,24 +77,7 @@ class Finance extends Model
             $transaction->updateQuietly(['saldo' => $currentBalance]);
         }
     }
-    /**
-     * Menghitung ulang saldo untuk semua transaksi
-     */
-    public static function recalculateBalances()
-    {
-        $transactions = self::orderBy('date', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
 
-        $currentBalance = 0;
-
-        foreach ($transactions as $transaction) {
-            if ($transaction->status_pembayaran == 1) {
-                $currentBalance += $transaction->amount;
-            }
-            $transaction->updateQuietly(['saldo' => $currentBalance]);
-        }
-    }
 
     /**
      * Relasi ke model User

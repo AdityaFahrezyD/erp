@@ -77,7 +77,7 @@ class SubModul extends Model
         return $this->hasMany(Invoice::class, 'modul_id', 'id');
     }
 
-        public function modul()
+    public function modul()
     {
         return $this->belongsTo(ProjectModul::class, 'modul_id');
     }

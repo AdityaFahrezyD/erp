@@ -25,7 +25,10 @@ use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\Filter;
+use Illuminate\Support\Facades\Auth;
 use App\Observers\SubModulObserver;
+use App\Helpers\ProjectAccessHelper;
+use Illuminate\Database\Eloquent\Model;
 
 class SubModulResource extends Resource
 {
@@ -39,10 +42,30 @@ class SubModulResource extends Resource
         return $form->schema([
             Select::make('project_id')
                 ->label('Project')
-                ->options(fn () => GoingProject::pluck('project_name', 'project_id'))
+                ->options(function () {
+                    if (!ProjectAccessHelper::isAdmin()) {
+                        $pegawaiId = ProjectAccessHelper::pegawaiId();
+
+                        if (!$pegawaiId) {
+                            return [];
+                        }
+
+                        return GoingProject::where('project_leader', $pegawaiId)
+                            ->pluck('project_name', 'project_id');
+                    }
+
+                    // Admin bisa lihat semua project
+                    return GoingProject::pluck('project_name', 'project_id');
+                })
                 ->reactive()
                 ->dehydrated(false)
-                ->required(),
+                ->required()
+                ->afterStateHydrated(function (Select $component, ?SubModul $record) {
+                    if ($record && $record->modul) {
+                        $component->state($record->modul->project_id);
+                    }
+                }),
+
 
             Select::make('modul_id')
                 ->label('Modul')
@@ -57,7 +80,8 @@ class SubModulResource extends Resource
                 })
                 ->disabled(fn (callable $get) => !$get('project_id'))
                 ->reactive()
-                ->required(),
+                ->required()
+                ->default(fn (?SubModul $record) => $record?->modul_id ?? null),
 
             TextInput::make('nama_sub_modul')
                 ->label('Nama Sub Modul')
@@ -295,25 +319,33 @@ class SubModulResource extends Resource
                     ->icon('heroicon-o-arrow-path')
                     ->color('primary')
                     ->action(function () {
-                        // Ambil semua modul yang ada
+                        // Ambil semua modul
                         $modulIds = SubModul::distinct()->pluck('modul_id');
+                        $subModuls = SubModul::with('dependencies')->get();
 
                         $observer = new SubModulObserver();
 
+                        // Hitung ulang batas_awal dan batas_akhir dulu
+                        foreach ($subModuls as $subModul) {
+                            $observer->updateDates($subModul);
+                        }
+
+                        // Lanjutkan hitung ulang critical path
                         foreach ($modulIds as $modulId) {
                             $observer->recalculateCriticalPath($modulId);
                         }
 
                         Notification::make()
-                            ->title('Perhitungan Jalur Kritis telah diperbarui')
+                            ->title('Perhitungan Jalur Kritis & Tanggal diperbarui')
                             ->success()
                             ->send();
                     })
                     ->requiresConfirmation()
-                    ->modalHeading('Hitung Ulang Semua Jalur Kritis')
-                    ->modalDescription('Tindakan ini akan menghitung ulang semua nilai EST, EFT, LST, LFT, dan critical path untuk semua submodul.')
+                    ->modalHeading('Hitung Ulang Semua Jalur Kritis & Tanggal')
+                    ->modalDescription('Tindakan ini akan menghitung ulang batas tanggal (awal/akhir) dan semua nilai EST, EFT, LST, LFT, serta critical path untuk semua submodul.')
                     ->modalButton('Lanjutkan'),
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])

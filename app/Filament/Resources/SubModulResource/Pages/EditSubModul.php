@@ -39,5 +39,10 @@ protected function getHeaderActions(): array
         }
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with('modul');
+    }
+
 
 }

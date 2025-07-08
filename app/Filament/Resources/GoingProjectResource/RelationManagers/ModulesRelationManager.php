@@ -17,12 +17,32 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Facades\Filament;
-
+use App\Helpers\ProjectAccessHelper;
+use Illuminate\Database\Eloquent\Model;
 
 
 class ModulesRelationManager extends RelationManager
 {
     protected static string $relationship = 'modules';
+
+
+    // Jangan pakai "static function", gunakan "public function"
+    public function canCreate(): bool
+    {
+        return \App\Helpers\ProjectAccessHelper::isAdmin() ||
+            \App\Helpers\ProjectAccessHelper::isProjectLeader($this->getOwnerRecord());
+    }
+
+    public function canEdit(Model $record): bool
+    {
+        return $this->canCreate();
+    }
+
+    public function canDelete(Model $record): bool
+    {
+        return $this->canCreate();
+    }
+
 
     public function form(Form $form): Form
     {
@@ -93,6 +113,7 @@ class ModulesRelationManager extends RelationManager
                         'recipient' => $record->project->pic,
                         'recipient_email' => $record->project->pic_email,
                     ]))
+                    ->visible(fn () => in_array(auth()->user()?->role, ['admin', 'finance', 'owner']))
                     ->color('success')
 
             ])

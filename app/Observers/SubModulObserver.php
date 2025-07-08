@@ -21,8 +21,6 @@ class SubModulObserver
         }
     }
 
-
-
     public function saved(SubModul $subModul): void
     {
         // Recalculate modul yang sedang diubah
@@ -43,26 +41,29 @@ class SubModulObserver
             $maxDependencyDate = SubModulDependencies::where('sub_modul_id', $subModul->id)
                 ->join('sub_modul as s', 's.id', '=', 'sub_modul_dependencies.depends_on_sub_modul_id')
                 ->max('s.batas_akhir');
-                
-            Log::info('Dependencies untuk SubModul ID ' . $subModul->id . ':', [
-                SubModulDependencies::where('sub_modul_id', $subModul->id)->pluck('depends_on_sub_modul_id')->toArray()
-            ]);
 
             if ($maxDependencyDate) {
-                $subModul->batas_awal = $maxDependencyDate;
+                // Tambahkan 1 hari agar mulai setelah dependency selesai
+                $startDate = Carbon::parse($maxDependencyDate)->addDay();
+                $subModul->batas_awal = $startDate->toDateString();
+
+                if ($subModul->expected_time) {
+                    $subModul->batas_akhir = $startDate->copy()
+                        ->addDays(round((float) $subModul->expected_time))
+                        ->toDateString();
+                }
+
+                $subModul->saveQuietly();
             }
-        }
 
-        // Jika batas_awal sudah ada dan expected_time sudah ada, hitung batas_akhir
-        if ($subModul->batas_awal && $subModul->expected_time) {
-            $subModul->batas_akhir = Carbon::parse($subModul->batas_awal)
-                ->addDays(round((float) $subModul->expected_time))
-                ->toDateString();
-        }
+            } elseif ($subModul->batas_awal && $subModul->expected_time) {
+                // batas_awal sudah ada, hitung ulang batas_akhir
+                $subModul->batas_akhir = Carbon::parse($subModul->batas_awal)
+                    ->addDays(round((float) $subModul->expected_time))
+                    ->toDateString();
 
-
-        // Simpan update tanpa trigger observer lagi
-        $subModul->saveQuietly();
+                $subModul->saveQuietly();
+            }
     }
 
     public static function afterCreate(CreateRecord $operation, SubModul $record)
@@ -82,17 +83,18 @@ class SubModulObserver
                 ->max('s.batas_akhir');
 
             if ($maxDependencyDate) {
-                $subModul->batas_awal = $maxDependencyDate;
+                $startDate = Carbon::parse($maxDependencyDate)->addDay();
+                $subModul->batas_awal = $startDate->toDateString();
+
+                if ($subModul->expected_time) {
+                    $subModul->batas_akhir = $startDate->copy()
+                        ->addDays(round((float) $subModul->expected_time))
+                        ->toDateString();
+                }
+
+                $subModul->saveQuietly();
             }
         }
-
-        if ($subModul->batas_awal && $subModul->expected_time) {
-            $subModul->batas_akhir = Carbon::parse($subModul->batas_awal)
-                ->addDays(round((float) $subModul->expected_time))
-                ->toDateString();
-        }
-
-        $subModul->saveQuietly();
     }
 
 

@@ -72,8 +72,4 @@ class Invoice extends Model
             }
         });
     }
-
-
-
-
 }

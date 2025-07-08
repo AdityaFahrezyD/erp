@@ -63,10 +63,6 @@ class Pegawai extends Model
         return $this->hasMany(ProjectStaff::class, 'id_pegawai');
     }
 
-        public function leader()
-    {
-        return $this->hasMany(GoingProject::class, 'project_leader');
-    }
     // Membuat UUID otomatis saat record baru dibuat
     protected static function boot()
     {
@@ -76,5 +72,9 @@ class Pegawai extends Model
                 $model->pegawai_id = (string) Str::uuid();
             }
         });
+    }
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'email', 'email');
     }
 }

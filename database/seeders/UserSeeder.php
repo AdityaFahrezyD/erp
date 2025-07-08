@@ -60,26 +60,26 @@ class UserSeeder extends Seeder
             ],
             [
                 'id' => Str::uuid()->toString(),
-                'email' => 'regular1@example.com',
+                'email' => 'adit@example.com',
                 'name' => 'Adit Fahrezy',
                 'first_name' => 'Adit',
                 'last_name' => 'Fahrezy',
-                'password' => Hash::make('user123'),
+                'password' => Hash::make('adit123'),
                 'image' => 'default.png',
-                'role' => 'staff', // Mengganti 'user' ke 'staff' sesuai dengan enum di migrasi
+                'role' => 'staff', 
                 'email_verified_at' => now(),
                 'remember_token' => Str::random(10),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
 
-                        [
+            [
                 'id' => Str::uuid()->toString(),
-                'email' => 'regular2@example.com',
+                'email' => 'arjun@example.com',
                 'name' => 'Regular2 User',
-                'first_name' => 'Regular2',
+                'first_name' => 'Arjun',
                 'last_name' => 'User',
-                'password' => Hash::make('user123'),
+                'password' => Hash::make('arjun123'),
                 'image' => 'default.png',
                 'role' => 'staff', // Mengganti 'user' ke 'staff' sesuai dengan enum di migrasi
                 'email_verified_at' => now(),
@@ -88,7 +88,7 @@ class UserSeeder extends Seeder
                 'updated_at' => now(),
             ],
 
-                        [
+            [
                 'id' => Str::uuid()->toString(),
                 'email' => 'regular3@example.com',
                 'name' => 'Regular3 User',

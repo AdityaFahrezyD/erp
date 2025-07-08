@@ -78,10 +78,15 @@ class ProjectManagement extends Page implements HasForms
             })->get();
             
         $projectEnd = Carbon::parse($project->batas_akhir);
+
         $latestSubEnd = $subModuls->max(function ($sub) {
-            return Carbon::parse($sub->batas_akhir);
+            return $sub->batas_akhir ? Carbon::parse($sub->batas_akhir) : null;
         });
-        $end = $latestSubEnd->greaterThan($projectEnd) ? $latestSubEnd : $projectEnd;
+
+        $end = $latestSubEnd && $latestSubEnd->greaterThan($projectEnd)
+            ? $latestSubEnd
+            : $projectEnd;
+
 
         $notes = [];
         foreach ($subModuls as $sub) {
@@ -212,8 +217,4 @@ class ProjectManagement extends Page implements HasForms
             default => 0, // new atau lainnya
         };
     }
-
-
-
-
 }

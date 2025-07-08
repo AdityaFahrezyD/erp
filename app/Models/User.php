@@ -99,9 +99,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Invoice::class, 'user_id', 'id');
     }
 
-    public function user() {
-        return $this->hasMany(ProjectStaff::class, 'id_user');
+    public function pegawai()
+    {
+        return $this->hasOne(Pegawai::class, 'email', 'email');
     }
+
     public function leader() {
         return $this->hasOne(GoingProject::class, 'project_leader');
     }
