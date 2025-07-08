@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Log;
 
 class Invoice extends Model
 {
@@ -49,10 +50,10 @@ class Invoice extends Model
     protected static function booted()
     {
         static::created(function ($invoice) {
-            \Log::info('Invoice created', ['status' => $invoice->approve_status]);
+            Log::info('Invoice created', ['status' => $invoice->approve_status]);
 
             if ($invoice->approve_status === 'approved' && $invoice->modul) {
-                \Log::info('Reducing unpaid_amount on created', [
+                Log::info('Reducing unpaid_amount on created', [
                     'modul_id' => $invoice->modul_id,
                     'amount' => $invoice->invoice_amount
                 ]);
@@ -61,10 +62,10 @@ class Invoice extends Model
         });
 
         static::updated(function ($invoice) {
-            \Log::info('Invoice updated', ['status' => $invoice->approve_status]);
+            Log::info('Invoice updated', ['status' => $invoice->approve_status]);
 
             if ($invoice->wasChanged('approve_status') && $invoice->approve_status === 'approved' && $invoice->modul) {
-                \Log::info('Reducing unpaid_amount on updated', [
+                Log::info('Reducing unpaid_amount on updated', [
                     'modul_id' => $invoice->modul_id,
                     'amount' => $invoice->invoice_amount
                 ]);

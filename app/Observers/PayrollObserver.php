@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Payroll;
 use App\Models\Finance;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class PayrollObserver
 {
@@ -45,7 +46,14 @@ class PayrollObserver
     /**
      * Handle the Payroll "deleted" event.
      */
-    public function deleted(Payroll $payroll): void
+    public function deleting(Payroll $payroll): void
+    {
+        Log::info('Processing deletion for payroll: ' . $payroll->payroll_id);
+        $deleted = Finance::where('fk_payroll_id', $payroll->payroll_id)->delete();
+        Log::info('Deleted Finance entries for fk_payroll_id: ' . $payroll->payroll_id . ', Rows affected: ' . $deleted);
+    }
+    
+     public function deleted(Payroll $payroll): void
     {
         //
     }
