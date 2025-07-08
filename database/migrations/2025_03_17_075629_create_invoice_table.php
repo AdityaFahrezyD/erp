@@ -27,7 +27,7 @@ return new class extends Migration
             $table->enum('approve_status', ['pending', 'approved', 'declined'])->default('pending');
             $table->timestamps();
 
-            $table->foreign('project_id')->references('project_id')->on('going_projects');
+            $table->foreign('project_id')->references('project_id')->on('going_projects')->onDelete('cascade');
             $table->foreign('modul_id')->references('id')->on('project_modul');
         });
     }

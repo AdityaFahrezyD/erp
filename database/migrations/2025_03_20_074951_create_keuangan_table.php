@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('finances', function (Blueprint $table) {
-            $table->id(); // Bigint auto-increment primary key
+            $table->id(); 
             $table->uuid('finance_id')->unique();
             $table->string('transaction_id')->unique();
             $table->uuid('user_id');
@@ -22,15 +22,15 @@ return new class extends Migration
             $table->uuid('fk_expense_id')->nullable();
             $table->enum('type', ['invoice', 'payroll', 'other']);
             $table->date('date');
-            $table->decimal('amount', 15, 2); // Ubah dari integer ke decimal untuk nilai uang
-            $table->decimal('saldo', 15, 2); // Ubah dari integer ke decimal untuk nilai uang
-            $table->text('notes')->nullable(); // Ubah dari string ke text untuk catatan panjang
-            $table->tinyInteger('status_pembayaran')->default(0); // 0=Belum Dibayar, 1=Sudah Dibayar
-            $table->string('judul_transaksi')->nullable(); // Tambahan judul transaksi
+            $table->decimal('amount', 15, 2); 
+            $table->decimal('saldo', 15, 2); 
+            $table->text('notes')->nullable(); 
+            $table->tinyInteger('status_pembayaran')->default(0); 
+            $table->string('judul_transaksi')->nullable(); 
             $table->timestamps();
-            $table->softDeletes(); // Tambahkan soft delete jika diperlukan
+            $table->softDeletes(); 
 
-            // Foreign key constraints
+
             $table->foreign('fk_invoice_id')->references('invoice_id')->on('invoice')->nullOnDelete();
             $table->foreign('fk_payroll_id')->references('payroll_id')->on('payroll')->nullOnDelete();
             $table->foreign('fk_expense_id')->references('expense_id')->on('other_expenses')->nullOnDelete();

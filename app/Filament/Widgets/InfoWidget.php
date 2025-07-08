@@ -11,8 +11,12 @@ class InfoWidget extends BaseWidget
 {
     protected function getStats(): array
     {
-        // Saldo terakhir berdasarkan date
-        $latestSaldo = Finance::orderByDesc('date')->value('saldo') ?? 0;
+       // Saldo terakhir berdasarkan total kumulatif dari transaksi lunas
+        $latestSaldo = Finance::where('status_pembayaran', 1)
+            ->orderByDesc('date')
+            ->orderByDesc('id')
+            ->value('saldo') ?? 0;
+
 
         // Total piutang (dari proyek yang belum dibayar)
         $totalPiutang = GoingProject::whereIn('status', ['on progress', 'waiting for payment', 'pending'])

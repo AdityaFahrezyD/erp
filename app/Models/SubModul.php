@@ -32,6 +32,7 @@ class SubModul extends Model
         'lft', // Latest Finish Time
         'total_float', // Total Float/Slack
         'is_critical_path',
+        'dependencies',
     ];
     protected $casts = [
         'batas_awal' => 'date',
@@ -102,8 +103,6 @@ class SubModul extends Model
         )->withTimestamps();
     }
 
-
-        // Scopes
     public function scopeCriticalPath($query)
     {
         return $query->where('is_critical_path', true);

@@ -27,7 +27,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('fk_project_id')->references('project_id')->on('going_projects')->nullOnDelete();
-            //$table->foreign('project_staff_id')->references('id')->on('project_staff')->nullOnDelete();
         });
     }
 
