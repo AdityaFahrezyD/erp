@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\OtherExpense;
 use App\Models\Finance;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Log;
 
 class OtherExpenseObserver
 {
@@ -46,7 +47,14 @@ class OtherExpenseObserver
     /**
      * Handle the OtherExpense "deleted" event.
      */
-    public function deleted(OtherExpense $otherExpense): void
+    public function deleting(OtherExpense $otherExpense): void
+    {
+        Log::info('Processing deletion for expense: ' . $otherExpense->expense_id);
+        $deleted = Finance::where('fk_expense_id', $otherExpense->expense_id)->delete();
+        Log::info('Deleted Finance entries for fk_expense_id: ' . $otherExpense->expense_id . ', Rows affected: ' . $deleted);
+    }
+    
+     public function deleted(OtherExpense $otherExpense): void
     {
         //
     }

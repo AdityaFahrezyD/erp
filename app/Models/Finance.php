@@ -80,21 +80,21 @@ class Finance extends Model
     /**
      * Menghitung ulang saldo untuk semua transaksi
      */
-    public static function recalculateBalances()
-    {
-        $transactions = self::orderBy('date', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
+    // public static function recalculateBalances()
+    // {
+    //     $transactions = self::orderBy('date', 'asc')
+    //         ->orderBy('id', 'asc')
+    //         ->get();
 
-        $currentBalance = 0;
+    //     $currentBalance = 0;
 
-        foreach ($transactions as $transaction) {
-            if ($transaction->status_pembayaran == 1) {
-                $currentBalance += $transaction->amount;
-            }
-            $transaction->updateQuietly(['saldo' => $currentBalance]);
-        }
-    }
+    //     foreach ($transactions as $transaction) {
+    //         if ($transaction->status_pembayaran == 1) {
+    //             $currentBalance += $transaction->amount;
+    //         }
+    //         $transaction->updateQuietly(['saldo' => $currentBalance]);
+    //     }
+    // }
 
     /**
      * Relasi ke model User

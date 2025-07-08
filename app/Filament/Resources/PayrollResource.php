@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class PayrollResource extends Resource
 {

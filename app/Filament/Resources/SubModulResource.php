@@ -26,6 +26,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\Filter;
 use App\Observers\SubModulObserver;
+use Illuminate\Support\Facades\Auth;
 
 class SubModulResource extends Resource
 {
