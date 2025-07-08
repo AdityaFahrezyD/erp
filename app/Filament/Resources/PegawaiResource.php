@@ -147,36 +147,36 @@ class PegawaiResource extends Resource
                     ->sortable()
                     ->label('Email'),
 
-                TextColumn::make('status')
-                    ->label('Status Pernikahan')
-                    ->badge()
-                    ->searchable()
-                    ->sortable()
-                    ->color(fn ($state): string => match ($state) {
-                        'single' => 'info',
-                        'maried' => 'success',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn ($state) => match ($state) {
-                        'single' => 'Single',
-                        'maried' => 'Married',
-                        default => 'Unknown',
-                    }),
+                // TextColumn::make('status')
+                //     ->label('Status Pernikahan')
+                //     ->badge()
+                //     ->searchable()
+                //     ->sortable()
+                //     ->color(fn ($state): string => match ($state) {
+                //         'single' => 'info',
+                //         'maried' => 'success',
+                //         default => 'gray',
+                //     })
+                //     ->formatStateUsing(fn ($state) => match ($state) {
+                //         'single' => 'Single',
+                //         'maried' => 'Married',
+                //         default => 'Unknown',
+                //     }),
 
-                TextColumn::make('tanggungan')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Jumlah Tanggungan'),
+                // TextColumn::make('tanggungan')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->label('Jumlah Tanggungan'),
 
-                TextColumn::make('base_salary')
-                    ->label('Gaji Dasar')  
-                    ->money('IDR', locale: 'id')
-                    ->sortable(),
+                // TextColumn::make('base_salary')
+                //     ->label('Gaji Dasar')  
+                //     ->money('IDR', locale: 'id')
+                //     ->sortable(),
 
-                TextColumn::make('asuransi.nama')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Asuransi'),
+                // TextColumn::make('asuransi.nama')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->label('Asuransi'),
 
                 TextColumn::make('pay_cycle')
                     ->label('Waktu Penggajian')
@@ -277,5 +277,16 @@ class PegawaiResource extends Resource
             'create' => Pages\CreatePegawai::route('/create'),
             'edit' => Pages\EditPegawai::route('/{record}/edit'),
         ];
+    }
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
     }
 }

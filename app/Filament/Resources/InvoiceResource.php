@@ -27,6 +27,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Support\Facades\Request;
 use Filament\Forms\Get;
 use App\Models\ProjectModul;
+use Illuminate\Support\Facades\Log;
 
 
 
@@ -94,17 +95,28 @@ class InvoiceResource extends Resource
                     ->options(function (Get $get) {
                         $projectId = $get('project_id');
                         if (!$projectId) return [];
-                        return \App\Models\ProjectModul::where('project_id', $projectId)->pluck('nama_modul', 'id');
+                        return ProjectModul::where('project_id', $projectId)
+                            ->pluck('nama_modul', 'id')
+                            ->toArray();
                     })
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->disabled(fn (Get $get) => ! $get('project_id'))
+                    ->disabled(fn (Get $get) => !$get('project_id'))
                     ->default(Request::input('modul_id'))
-                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state) {
-                        if (!$state) return;
+                    ->reactive()
+                    ->afterStateUpdated(function (\Filament\Forms\Set $set, $state, Get $get) {
+                        if (!$state) {
+                            $set('unpaid_amount', 0);
+                            return;
+                        }
                         $modul = ProjectModul::find($state);
-                        $set('unpaid_amount', $modul?->unpaid_amount ?? 0);
+                        $unpaidAmount = $modul?->unpaid_amount ?? 0;
+                        Log::info('Modul selected', [
+                            'modul_id' => $state,
+                            'unpaid_amount' => $unpaidAmount,
+                        ]);
+                        $set('unpaid_amount', $unpaidAmount);
                     }),
 
             TextInput::make('unpaid_amount')
@@ -113,12 +125,20 @@ class InvoiceResource extends Resource
                 ->disabled()
                 ->dehydrated(false)
                 ->reactive()
-                ->default(0) // Default awal saja
-                ->afterStateHydrated(function (\Filament\Forms\Set $set, ?string $state, Get $get) { // Corrected type hint here
+                ->default(0)
+                ->afterStateHydrated(function (\Filament\Forms\Set $set, Get $get) {
                     $modulId = $get('modul_id');
-                    if (!$modulId) return;
+                    if (!$modulId) {
+                        $set('unpaid_amount', 0);
+                        return;
+                    }
                     $modul = ProjectModul::find($modulId);
-                    $set('unpaid_amount', $modul?->unpaid_amount ?? 0);
+                    $unpaidAmount = $modul?->unpaid_amount ?? 0;
+                    Log::info('Hydrating unpaid_amount', [
+                        'modul_id' => $modulId,
+                        'unpaid_amount' => $unpaidAmount,
+                    ]);
+                    $set('unpaid_amount', $unpaidAmount);
                 }),
 
 
@@ -206,7 +226,7 @@ class InvoiceResource extends Resource
                     return ((int)$livewire->getTablePage() - 1) * (int)$livewire->getTableRecordsPerPage() + $index + 1;
                 })
                 ->alignCenter(),
-            Tables\Columns\TextColumn::make('going_projects.project_name')->label('Project')->searchable(),
+            Tables\Columns\TextColumn::make('project.project_name')->label('Project')->searchable(),
             
             Tables\Columns\TextColumn::make('modul.nama_modul')->label('Modul')->searchable(),
             TextColumn::make('information')->label('Invoice Name')->searchable(),

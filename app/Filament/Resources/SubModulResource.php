@@ -19,6 +19,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Illuminate\Support\Facades\Auth;
 
 class SubModulResource extends Resource
 {
@@ -192,5 +193,16 @@ class SubModulResource extends Resource
             'create' => Pages\CreateSubModul::route('/create'),
             'edit' => Pages\EditSubModul::route('/{record}/edit'),
         ];
+    }
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
     }
 }

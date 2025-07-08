@@ -16,7 +16,7 @@ class Deductions extends Model
 
     // Kolom yang dapat diisi
     protected $fillable = [
-        'deduction_id', 'fk_pegawai_id', 'deduction_type', 'amount'
+        'deduction_id', 'fk_pegawai_id', 'keterangan', 'amount'
     ];
 
     // Casting untuk tipe data khusus

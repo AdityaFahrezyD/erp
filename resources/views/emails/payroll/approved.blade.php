@@ -14,7 +14,7 @@
         <tr>
             <td style="padding: 30px;">
                 <p style="font-size: 16px;">
-                    Halo {{ $payroll->penerima }}, payroll Anda telah <strong>disetujui</strong>. Berikut rincian payroll Anda:
+                    Halo {{ $payroll->pegawai->nama }}, payroll Anda telah <strong>disetujui</strong>. Berikut rincian payroll Anda:
                 </p>
                 <table cellpadding="0" cellspacing="0" width="100%" style="margin-top: 20px; border-collapse: collapse;">
                     <tr>
@@ -23,11 +23,11 @@
                     </tr>
                     <tr>
                         <td style="padding: 10px; background-color: #f2f2f2; font-weight: bold;">Keterangan:</td>
-                        <td style="padding: 10px;">{{ $payroll->keterangan }}</td>
+                        <td style="padding: 10px;">{{ $payroll->jenis_gaji }}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; background-color: #f2f2f2; font-weight: bold;">Jumlah:</td>
-                        <td style="padding: 10px;">Rp {{ number_format($payroll->harga, 0, ',', '.') }}</td>
+                        <td style="padding: 10px;">Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</td>
                     </tr>
                     <tr>
                         <td style="padding: 10px; background-color: #f2f2f2; font-weight: bold;">Tanggal Kirim:</td>

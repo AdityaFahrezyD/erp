@@ -17,6 +17,7 @@ use App\Filament\Resources\GoingProjectResource\RelationManagers\ModulesRelation
 use App\Filament\Resources\GoingProjectResource\RelationManagers\PaymentsRelationManager;
 use App\Filament\Resources\GoingProjectResource\RelationManagers\StaffRelationManager;
 use App\Models\Pegawai;
+use Illuminate\Support\Facades\Auth;
 
 
 class GoingProjectResource extends Resource
@@ -167,5 +168,16 @@ class GoingProjectResource extends Resource
             'create' => Pages\CreateGoingProject::route('/create'),
             'edit' => Pages\EditGoingProject::route('/{record}/edit'),
         ];
+    }
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
     }
 }

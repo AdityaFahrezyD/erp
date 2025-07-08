@@ -47,22 +47,18 @@ class UserResource extends Resource
 
                 TextInput::make('password')
                     ->password()
-                    ->required()
+                    ->required(fn ($livewire) => $livewire instanceof \App\Filament\Resources\UserResource\Pages\CreateUser) // Hanya wajib saat membuat
+                    ->minLength(8) // Minimal 8 karakter
                     ->label('Kata Sandi')
-                    ->confirmed(),
+                    ->confirmed()
+                    ->dehydrated(fn ($state) => filled($state)), // Hanya simpan jika diisi
 
                 TextInput::make('password_confirmation')
                     ->password()
-                    ->required()
-                    ->dehydrated(false)
+                    ->required(fn ($livewire) => $livewire instanceof \App\Filament\Resources\UserResource\Pages\CreateUser) // Hanya wajib saat membuat
+                    ->minLength(8) // Minimal 8 karakter
+                    ->dehydrated(false) // Tidak disimpan
                     ->label('Konfirmasi Kata Sandi'),
-
-                FileUpload::make('image')
-                    ->label('Foto')
-                    ->image()
-                    ->disk('public')
-                    ->directory('user-images')
-                    ->nullable(),
 
                 Select::make('role')
                     ->label('User Role')
@@ -72,21 +68,31 @@ class UserResource extends Resource
                         'finance' => 'Finance',
                         //'user' => 'User',
                     ]),
+
+                FileUpload::make('image')
+                    ->label('Foto')
+                    ->image()
+                    ->disk('public')
+                    ->directory('user-images')
+                    ->nullable(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereNotIn('role', ['admin', 'owner']))
             ->columns([
                 TextColumn::make('email'),
                 TextColumn::make('first_name')->label('Nama Depan'),
                 TextColumn::make('last_name')->label('Nama Belakang'),
                 TextColumn::make('role'),
-                ImageColumn::make('image')->label('Foto')
-                ->width(50)
-                ->height(50)
-                ->circular(),
+                ImageColumn::make('image')
+                    ->label('Foto')
+                    ->circular()
+                    ->width(50)
+                    ->height(50),
+                    //->getStateUsing(fn ($record) => $record->image ? Storage::url($record->image) : null),
             ])
             ->filters([
                 //

@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateBonuses extends CreateRecord
 {
     protected static string $resource = BonusesResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

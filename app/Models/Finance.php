@@ -4,12 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Optional
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Finance extends Model
 {
     use HasFactory;
-    // use SoftDeletes; // Uncomment if you want to use soft deletes
+    // use SoftDeletes; // Uncomment jika ingin menggunakan soft deletes
 
     protected $fillable = [
         'finance_id',
@@ -35,92 +35,79 @@ class Finance extends Model
     ];
 
     /**
-     * Update the saldo (balance) when saving the record
-     * This method automatically calculates the balance when a record is created or updated
-     * @return void
+     * Boot the model and set up event listeners
      */
     protected static function booted()
     {
+        // Saat transaksi baru dibuat
         static::creating(function ($finance) {
-            $latestTransaction = self::where('date', '<', $finance->date)
+            // Set saldo awal berdasarkan transaksi sebelumnya
+            $latestTransaction = self::where('date', '<=', $finance->date)
                 ->where('status_pembayaran', 1)
                 ->orderBy('date', 'desc')
                 ->orderBy('id', 'desc')
                 ->first();
-            $currentBalance = $latestTransaction ? $latestTransaction->saldo : 0;
-            
-            if ($finance->status_pembayaran == 1) {
-                $finance->saldo = $currentBalance + $finance->amount;
-            } else {
-                $finance->saldo = $currentBalance;
-            }
+
+            $finance->saldo = $latestTransaction ? $latestTransaction->saldo : 0;
         });
 
-        static::updating(function ($finance) {
-            if ($finance->isDirty('status_pembayaran') && $finance->status_pembayaran == 1) {
-                $latestTransaction = self::where('date', '<', $finance->date)
-                    ->where('status_pembayaran', 1)
-                    ->orderBy('date', 'desc')
-                    ->orderBy('id', 'desc')
-                    ->first();
-                $currentBalance = $latestTransaction ? $latestTransaction->saldo : 0;
-                $finance->saldo = $currentBalance + $finance->amount;
-            }
-            
-            if ($finance->isDirty('amount') && $finance->status_pembayaran == 1) {
-                $latestTransaction = self::where('date', '<', $finance->date)
-                    ->where('status_pembayaran', 1)
-                    ->orderBy('date', 'desc')
-                    ->orderBy('id', 'desc')
-                    ->first();
-                $currentBalance = $latestTransaction ? $latestTransaction->saldo : 0;
-                $finance->saldo = $currentBalance + $finance->amount;
-            }
-            
-            if ($finance->isDirty('status_pembayaran') && $finance->getOriginal('status_pembayaran') == 1 && $finance->status_pembayaran != 1) {
-                $finance->saldo = $finance->getOriginal('saldo') - $finance->amount;
-            }
-        });
-        
-        // After a record is updated, we may need to recalculate subsequent records
+        // Saat transaksi disimpan (create atau update)
         static::saved(function ($finance) {
-            if ($finance->wasChanged('status_pembayaran') || $finance->wasChanged('amount')) {
-                $allRecords = self::where('date', '>=', $finance->date)
-                    ->orderBy('date', 'asc')
-                    ->orderBy('id', 'asc')
-                    ->get();
-                
-                $currentBalance = 0;
-                foreach ($allRecords as $index => $record) {
-                    if ($record->status_pembayaran == 1) {
-                        $currentBalance += $record->amount;
-                    }
-                    if ($record->id !== $finance->id) { // Hindari update diri sendiri
-                        self::where('id', $record->id)->update(['saldo' => $currentBalance]);
-                    }
-                }
-            }
+            self::recalculateBalances();
+        });
+
+        // Saat transaksi dihapus
+        static::deleted(function ($finance) {
+            self::recalculateBalances();
         });
     }
 
     /**
-     * Get the user that owns this finance record
+     * Menghitung ulang saldo untuk semua transaksi
+     */
+    public static function recalculateBalances()
+    {
+        $transactions = self::orderBy('date', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $currentBalance = 0;
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->status_pembayaran == 1) {
+                $currentBalance += $transaction->amount;
+            }
+            $transaction->updateQuietly(['saldo' => $currentBalance]);
+        }
+    }
+
+    /**
+     * Relasi ke model User
      */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
+
+    /**
+     * Relasi ke model Invoice
+     */
     public function invoice()
     {
         return $this->belongsTo(Invoice::class, 'fk_invoice_id');
     }
 
+    /**
+     * Relasi ke model Payroll
+     */
     public function payroll()
     {
         return $this->belongsTo(Payroll::class, 'fk_payroll_id');
     }
 
+    /**
+     * Relasi ke model OtherExpense
+     */
     public function other_expense()
     {
         return $this->belongsTo(OtherExpense::class, 'fk_expense_id');

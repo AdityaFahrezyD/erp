@@ -5,8 +5,9 @@
     <title>Payroll List</title>
     <style>
         body { font-family: sans-serif; }
-        table { width: 20%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; }
+        table { width: 100%; border-collapse: collapse; } /* Ubah ke 100% agar lebih rapi */
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
     </style>
 </head>
 <body>
@@ -27,11 +28,11 @@
         <tbody>
             @foreach($payrolls as $payroll)
             <tr>
-                <td>{{ $payroll->penerima }}</td>
-                <td>{{ $payroll->keterangan }}</td>
-                <td>Rp {{ number_format($payroll->harga, 0, ',', '.') }}</td>
-                <td>{{ $payroll->email_penerima }}</td>
-                <td>{{ $payroll->tanggal_kirim }}</td>
+                <td>{{ $payroll->pegawai->nama ?? 'N/A' }}</td>
+                <td>{{ $payroll->jenis_gaji }}</td>
+                <td>Rp {{ number_format($payroll->net_salary, 0, ',', '.') }}</td>
+                <td>{{ $payroll->email_penerima ?? 'N/A' }}</td>
+                <td>{{ \Carbon\Carbon::parse($payroll->tanggal_kirim)->format('d M Y') }}</td>
                 <td>{{ ucfirst($payroll->approve_status) }}</td>
                 <td>{{ $payroll->created_at }}</td>
                 <td>{{ $payroll->updated_at }}</td>

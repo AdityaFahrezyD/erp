@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class DeductionsResource extends Resource
 {
@@ -26,11 +27,8 @@ class DeductionsResource extends Resource
                     ->label('Pegawai')
                     ->options(\App\Models\Pegawai::pluck('nama', 'pegawai_id'))
                     ->required(),
-                Forms\Components\Select::make('deduction_type')
-                    ->label('Jenis Pemotongan')
-                    ->options([
-                        'penalty' => 'Denda',
-                    ])
+                Forms\Components\Textarea::make('keterangan')
+                    ->label('Keterangan')
                     ->required(),
                 Forms\Components\TextInput::make('amount')
                     ->label('Jumlah')
@@ -46,8 +44,8 @@ class DeductionsResource extends Resource
                 Tables\Columns\TextColumn::make('pegawai.nama')
                     ->label('Nama Pegawai')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('deduction_type')
-                    ->label('Jenis Pemotongan')
+                Tables\Columns\TextColumn::make('keterangan')
+                    ->label('Keterangan')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->label('Jumlah')
@@ -91,5 +89,16 @@ class DeductionsResource extends Resource
             'create' => Pages\CreateDeductions::route('/create'),
             'edit' => Pages\EditDeductions::route('/{record}/edit'),
         ];
+    }
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
     }
 }

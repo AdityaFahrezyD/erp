@@ -17,6 +17,7 @@ class SendApprovedPayrolls extends Command
     {
         $today = now();
 
+        // Payroll sekali kirim (hanya pada tanggal_kirim spesifik, belum dikirim)
         $oneTime = Payroll::where('approve_status', 'approved')
             ->whereDate('tanggal_kirim', $today->toDateString())
             ->whereNull('sent_at')
@@ -27,6 +28,7 @@ class SendApprovedPayrolls extends Command
             $payroll->update(['sent_at' => Carbon::now()]);
         }
 
+        // Payroll bulanan (dikirim ulang setiap bulan pada hari yang sama)
         $monthly = Payroll::where('approve_status', 'approved')
             ->whereNotNull('sent_at')
             ->whereDay('tanggal_kirim', $today->day)
@@ -36,6 +38,7 @@ class SendApprovedPayrolls extends Command
             Mail::to($payroll->email_penerima)->send(new PayrollApprovedMail($payroll));
         }
 
+        // Hitung total payroll yang dikirim
         $total = $oneTime->count() + $monthly->count();
         $this->info("Payrolls sent: " . $total);
     }

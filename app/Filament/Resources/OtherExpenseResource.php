@@ -28,6 +28,7 @@ class OtherExpenseResource extends Resource
     protected static ?string $model = OtherExpense::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-receipt-percent';
+    protected static ?string $navigationLabel = 'Expense';
 
     public static function form(Form $form): Form
     {
@@ -196,10 +197,14 @@ class OtherExpenseResource extends Resource
 
         return $table
             ->columns([
-                TextColumn::make('expense_id')
+                // TextColumn::make('expense_id')
+                //     ->searchable()
+                //     ->sortable()
+                //     ->label('ID Pengeluaran'),
+                TextColumn::make('nama_pengeluaran')
                     ->searchable()
                     ->sortable()
-                    ->label('ID Pengeluaran'),
+                    ->label('Nama Pengeluaran'),
                 TextColumn::make('type_expense')
                     ->label('Jenis Pengeluaran')
                     ->badge()
@@ -221,10 +226,6 @@ class OtherExpenseResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('nama_pengeluaran')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Nama Pengeluaran'),
 
                 TextColumn::make('keterangan')
                     ->searchable()

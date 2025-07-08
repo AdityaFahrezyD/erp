@@ -48,9 +48,24 @@
             margin-top: 1rem;
             font-size: 0.875rem;
         }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .header img {
+            width: 100px; /* Ukuran gambar dapat disesuaikan */
+            height: auto;
+            margin-right: 1rem;
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <!-- <img src="{{ asset('storage/logo/texio_indonesia_cover.jpeg') }}" alt="Texio Indonesia Logo"> -->
+        <h2>Invoice</h2>
+    </div>
+    
     <table class="w-full">
         <tr>
             <td class="w-half">
@@ -101,7 +116,7 @@
  
     <div class="footer margin-top">
         <div>Thank you</div>
-        <div>&copy; PT. Texio Mitra Digitalisasi</div>
+        <div>© PT. Texio Mitra Digitalisasi</div>
     </div>
 </body>
 </html>

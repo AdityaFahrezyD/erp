@@ -15,6 +15,11 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TestResource extends Resource
 {
+    public static function canViewAny(): bool
+    {
+        return false;
+    }
+
     protected static ?string $model = Test::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

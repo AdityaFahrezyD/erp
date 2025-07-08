@@ -21,4 +21,8 @@ class EditUser extends EditRecord
         $data['name'] = $data['first_name'] . ' ' . $data['last_name'];
         return $data;
     }
+    // protected function getRedirectUrl(): string
+    // {
+    //     return $this->getResource()::getUrl('index');
+    // }
 }

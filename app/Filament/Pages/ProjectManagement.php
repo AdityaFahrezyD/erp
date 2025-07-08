@@ -11,6 +11,7 @@ use Filament\Forms;
 use Filament\Pages\Page;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
+use Illuminate\Support\Facades\Auth;
 
 class ProjectManagement extends Page implements HasForms
 {
@@ -94,6 +95,18 @@ class ProjectManagement extends Page implements HasForms
         }
 
         $this->calendarData = $days;
+    }
+
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
     }
 
 }

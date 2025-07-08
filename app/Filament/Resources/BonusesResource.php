@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class BonusesResource extends Resource
 {
@@ -91,5 +92,16 @@ class BonusesResource extends Resource
             'create' => Pages\CreateBonuses::route('/create'),
             'edit' => Pages\EditBonuses::route('/{record}/edit'),
         ];
+    }
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner']);
     }
 }

@@ -207,25 +207,27 @@ class PayrollResource extends Resource
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->action(function () {
-                        $payrolls = Payroll::where('user_id', auth()->id())->get();
+                        // Ambil hanya payroll dengan approve_status 'approved' untuk user yang sedang login
+                        $payrolls = Payroll::where('user_id', auth()->id())
+                            ->where('approve_status', 'approved')
+                            ->get();
+
                         $pdf = Pdf::loadView('exports.payrolls', ['payrolls' => $payrolls])->setPaper('a4', 'landscape');
                         return response()->streamDownload(function () use ($pdf) {
                             echo $pdf->stream();
-                        }, 'Data Payroll.pdf');
+                        }, 'Data Payroll_' . now()->format('Ymd_His') . '.pdf');
                     }),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-                Tables\Actions\BulkAction::make('approve_all')
-                    ->label('Setujui Semua')
-                    ->icon('heroicon-o-check')
-                    ->requiresConfirmation()
-                    ->action(function (Collection $records) {
-                        foreach ($records as $record) {
-                            $record->update(['approve_status' => 'approved']);
-                        }
-                    })
-                    ->deselectRecordsAfterCompletion(),
+                Tables\Actions\BulkAction::make('approveBulk')
+                        ->label('Approve selected')
+                        ->action(fn ($records) => $records->each(fn ($record) =>
+                            $record->update(['approve_status' => 'approved'])
+                        ))
+                        ->requiresConfirmation()
+                        ->color('success')
+                        ->icon('heroicon-m-check'),
             ]);
     }
 

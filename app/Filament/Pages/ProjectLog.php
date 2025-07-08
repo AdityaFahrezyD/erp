@@ -10,6 +10,7 @@ use App\Models\ProjectModul;
 use App\Models\SubModul;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Url;
+use Illuminate\Support\Facades\Auth;
 
 
 class ProjectLog extends Page implements Forms\Contracts\HasForms
@@ -99,6 +100,17 @@ class ProjectLog extends Page implements Forms\Contracts\HasForms
             'ready for test' => 'Ready for Test',
             'done' => 'Done',
         ];
+    }
+    public static function canViewAny(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        $user = Auth::user();
+        return $user && in_array($user->role, ['admin', 'owner', 'staff']);
     }
 
 }
