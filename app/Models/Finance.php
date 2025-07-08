@@ -37,6 +37,7 @@ class Finance extends Model
     /**
      * Boot the model and set up event listeners
      */
+
     protected static function booted()
     {
         // Saat transaksi baru dibuat
@@ -61,7 +62,21 @@ class Finance extends Model
             self::recalculateBalances();
         });
     }
+    public static function recalculateBalances()
+    {
+        $transactions = self::orderBy('date', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
 
+        $currentBalance = 0;
+
+        foreach ($transactions as $transaction) {
+            if ($transaction->status_pembayaran == 1) {
+                $currentBalance += $transaction->amount;
+            }
+            $transaction->updateQuietly(['saldo' => $currentBalance]);
+        }
+    }
     /**
      * Menghitung ulang saldo untuk semua transaksi
      */

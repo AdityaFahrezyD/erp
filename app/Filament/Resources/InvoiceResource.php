@@ -89,7 +89,7 @@ class InvoiceResource extends Resource
             $isReadonly && !$isCreate
                 ? Placeholder::make('modul_id')
                     ->label('Modul Name')
-                    ->content(fn ($record) => optional($record->modul)->modul_name ?? '-')
+                    ->content(fn ($record) => optional($record->modul)->nama_modul ?? '-')
                 : Select::make('modul_id')
                     ->label('Modul Name')
                     ->options(function (Get $get) {
@@ -226,6 +226,7 @@ class InvoiceResource extends Resource
                     return ((int)$livewire->getTablePage() - 1) * (int)$livewire->getTableRecordsPerPage() + $index + 1;
                 })
                 ->alignCenter(),
+            Tables\Columns\TextColumn::make('project.project_name')->label('Project')->searchable(),
             Tables\Columns\TextColumn::make('project.project_name')->label('Project')->searchable(),
             
             Tables\Columns\TextColumn::make('modul.nama_modul')->label('Modul')->searchable(),

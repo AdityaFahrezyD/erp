@@ -20,6 +20,10 @@ class TestResource extends Resource
         return false;
     }
 
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
     protected static ?string $model = Test::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';

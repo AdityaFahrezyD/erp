@@ -65,7 +65,7 @@ class OtherExpenseResource extends Resource
                 }),
 
             Select::make('judul_project')
-                ->label('Judul Project')
+                ->label('Nama Project')
                 ->options(function (callable $get) {
                     $type = $get('type_expense');
                     if ($type === 'project') {
@@ -156,6 +156,7 @@ class OtherExpenseResource extends Resource
                     return $type === 'project' && in_array($nama, ['transport', 'accommodation']);
                 })
                 ->required(),
+
 
             TextInput::make('keterangan')
                 ->required()

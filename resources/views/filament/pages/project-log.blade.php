@@ -37,7 +37,7 @@
                     >
                         @forelse ($cards[$statusKey] ?? [] as $item)
                             <div
-                                class="kanban-card bg-white p-2 rounded shadow text-sm cursor-move"
+                                class="kanban-card {{ $item['is_critical_path'] ? 'bg-red-50 border border-red-300' : 'bg-white' }} bg-white p-2 rounded shadow text-sm cursor-move"
                                 draggable="true"
                                 ondragstart="handleDragStart(event, '{{ $item['id'] }}')"
                                 ondragend="handleDragEnd(event)"
@@ -45,6 +45,16 @@
                                 <strong>{{ $item['modul'] }}</strong><br>
                                 <span class="text-gray-600">{{ $item['sub_modul'] }}</span><br>
                                 <span class="text-xs text-gray-400">Staff: {{ $item['staff'] }}</span>
+
+                                 @if ($item['is_critical_path'])
+                                    <span class="inline-block mt-1 text-xs text-red-600 font-semibold bg-red-100 rounded px-2 py-0.5">
+                                        🚨 Jalur Kritis
+                                    </span>
+                                @else
+                                    <span class="inline-block mt-1 text-xs text-gray-500 bg-gray-100 rounded px-2 py-0.5">
+                                        Tidak Kritis
+                                    </span>
+                                @endif
                             </div>
                         @empty
                             <div class="h-full rounded border-2 border-dashed border-gray-300"></div>

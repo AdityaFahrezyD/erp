@@ -15,6 +15,10 @@ use App\Observers\OtherExpenseObserver;
 use App\Models\Invoice;
 use App\Models\Payroll;
 use App\Models\OtherExpense;
+use App\Models\ProjectStaff;
+use App\Observers\ProjectStaffObserver;
+use App\Models\SubModul;
+use App\Observers\SubModulObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -36,6 +40,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        ProjectStaff::observe(ProjectStaffObserver::class);
+        SubModul::observe(SubModulObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Model::unguard();
 
